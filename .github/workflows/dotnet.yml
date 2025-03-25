@@ -18,11 +18,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.x 
+
     - name: Fetch resonite
       run: |
         mkdir C:\steamcmd
@@ -30,7 +26,15 @@ jobs:
         Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile c:\steamcmd\steamcmd.zip
         Expand-Archive c:\steamcmd\steamcmd.zip -Force
         New-Item -ItemType Directory -Path "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed"
-        ./steamcmd +force_install_dir "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed" +login ${{ secrets.STEAMUSER }} ${{ secrets.STEAMPASS }} +app_update 2519830
+        dir c:\steamcmd
+        c:\steamcmd\steamcmd +force_install_dir "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed" +login ${{ secrets.STEAMUSER }} ${{ secrets.STEAMPASS }} +app_update 2519830
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x 
+    - uses: actions/checkout@v4
+
     - name: Restore dependencies
       run: cd "$ROOT"; dotnet restore
     - name: Build
