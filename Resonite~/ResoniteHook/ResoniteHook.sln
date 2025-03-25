@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Puppeteer", "Puppeteer\Pupp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResoPuppetSchema", "ResoPuppetSchema\ResoPuppetSchema.csproj", "{274201D6-7529-4420-80FC-D51ADEBA78A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuppeteerBundledDeps", "PuppeteerBundledDeps\PuppeteerBundledDeps.csproj", "{35AE33D5-8BE5-4E2E-8D37-2AB5055A0F14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,5 +36,9 @@ Global
 		{C7425EF3-5829-48A2-8B52-F76096AA736F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7425EF3-5829-48A2-8B52-F76096AA736F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7425EF3-5829-48A2-8B52-F76096AA736F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35AE33D5-8BE5-4E2E-8D37-2AB5055A0F14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35AE33D5-8BE5-4E2E-8D37-2AB5055A0F14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35AE33D5-8BE5-4E2E-8D37-2AB5055A0F14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35AE33D5-8BE5-4E2E-8D37-2AB5055A0F14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
