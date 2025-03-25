@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  ROOT: Resonite~/ResoniteHook
+
 jobs:
   build:
 
@@ -21,8 +24,8 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
-      run: cd 'Resonite~'; dotnet restore
+      run: cd "$ROOT"; dotnet restore
     - name: Build
-      run: cd 'Resonite~'; dotnet build --no-restore
+      run: cd "$ROOT"; dotnet build --no-restore
     - name: Test
-      run: cd 'Resonite~'; dotnet test --no-build --verbosity normal
+      run: cd "$ROOT"; dotnet test --no-build --verbosity normal
