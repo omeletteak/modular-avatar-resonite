@@ -11,7 +11,8 @@ on:
 
 env:
   RPC_SERVER_SRC: Resonite~/ResoniteHook
-  RESONITE_PATH: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite\\Resonite_Data\\Managed"
+  RESONITE_PATH: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite"
+  CACHE_SALT: -v2
 
 jobs:
   build:
@@ -43,7 +44,7 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: "${{ env.RESONITE_PATH }}"
-        key: resonite
+        key: resonite-${{ env.CACHE_SALT }}
 
     - name: Cache steamcmd
       id: cache-steamcmd
