@@ -28,8 +28,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore "${{ env.RPC_SERVER_SRC }}" -v normal
 
-    - run: dir "${{ env.RPC_SERVER_SRC }}/packages"
-
     - name: Cache resonite
       id: cache-resonite
       uses: actions/cache/restore@v4
