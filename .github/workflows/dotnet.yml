@@ -21,9 +21,8 @@ jobs:
 
     - name: Setup steamcmd
       run: |
-        mkdir C:\
         cd c:\
-        Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile c:\steamcmd\steamcmd.zip
+        Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile c:\steamcmd.zip
         Expand-Archive c:\steamcmd.zip -Force
         New-Item -ItemType Directory -Path "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed"
         dir c:\steamcmd
