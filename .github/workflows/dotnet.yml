@@ -21,9 +21,7 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Restore dependencies
-      run: |
-        dir
-        cd "${{ env.RPC_SERVER_SRC }}"; dir; dotnet restore; dir
+      run: dotnet restore "${{ env.RPC_SERVER_SRC }}" --packages "${{ env.RPC_SERVER_SRC }}/packages" -v detailed
 
     - name: Cache resonite
       id: cache-resonite
