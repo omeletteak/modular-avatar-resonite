@@ -1,0 +1,36 @@
+syntax = "proto3";
+option csharp_namespace = "nadena.dev.ndmf.proto";
+
+package nadena.dev.ndmf.proto;
+
+import "proto/base_types.proto";
+import "proto/mesh.proto";
+
+message Asset {
+  string name = 1;
+  AssetID id = 2;
+  
+  oneof asset {
+    Mesh mesh = 10;
+    Material material = 11;
+    Texture texture = 12;
+  }
+}
+
+message Material {
+  oneof main_texture {
+    Texture texture = 1;
+    Color color = 2;
+  }
+  //Texture normal_map = 2;
+  //uint32 render_queue = 3;
+  
+  // TODO...
+}
+
+message Texture {
+  oneof contents {
+    Blob png = 1;
+    Blob jpeg = 2;
+  }
+}

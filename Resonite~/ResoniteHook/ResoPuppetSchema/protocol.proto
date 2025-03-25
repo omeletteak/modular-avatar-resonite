@@ -1,0 +1,80 @@
+syntax = "proto3";
+option csharp_namespace = "ResoPuppetSchema";
+
+package ResoPuppetSchema;
+
+import "mesh.proto";
+import "types.proto";
+
+service ResoPuppet {
+  rpc CreateSlot (CreateSlotRequest) returns (RefID);
+  rpc DestroyAll (Empty) returns (Empty);
+  rpc DestroySlot (RefID) returns (Empty);
+  
+  rpc Export (ExportRequest) returns (Empty);
+  
+  // Asset creation
+  rpc CreateMesh (MeshData) returns (RefID);
+  rpc CreateTexture (CreateTextureRequest) returns (RefID);
+  rpc CreateTestMaterial (CreateTestMaterialRequest) returns (RefID);
+  
+  // Component creation
+  rpc CreateSkinnedMeshRenderer (CreateSkinnedMeshRendererRequest) returns (RefID);
+  rpc CreateMeshRenderer (CreateMeshRendererRequest) returns (RefID);
+  rpc CreateMeshCollider (CreateMeshColliderRequest) returns (RefID);
+  
+  rpc MakeGrabbable (RefID) returns (Empty);
+}
+
+message CreateSlotRequest {
+  optional RefID parent = 1;
+  string name = 2;
+  optional Transform localTransform = 3;
+  bool isRoot = 4;
+}
+
+message CreateTestMaterialRequest {
+  RefID targetSlot = 1;
+  RefID texture = 2;
+}
+
+message CreateMeshRendererRequest {
+  RefID targetSlot = 1;
+  RefID mesh = 2;
+  repeated RefID material = 3;
+}
+
+message CreateMeshColliderRequest {
+  RefID targetSlot = 1;
+  optional RefID mesh = 2;
+}
+
+message ExportRequest {
+  string folder = 1;
+  string name = 2;
+  RefID root = 3;
+  bool includeVariants = 4;
+}
+
+message MeshData {
+  RefID targetSlot = 1;
+  ResoPuppetSchema.Mesh.Mesh mesh = 2;
+}
+
+enum TextureFormat {
+  PNG = 0;
+  JPEG = 1;
+}
+
+message CreateTextureRequest {
+  RefID targetSlot = 1;
+  bytes data = 2;
+  TextureFormat format = 3;
+}
+
+message CreateSkinnedMeshRendererRequest {
+  RefID targetSlot = 1;
+  RefID mesh = 2;
+  repeated RefID material = 3;
+  repeated RefID bones = 4;
+}

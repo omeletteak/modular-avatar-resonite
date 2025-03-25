@@ -1,0 +1,33 @@
+syntax = "proto3";
+option csharp_namespace = "nadena.dev.ndmf.proto";
+
+package nadena.dev.ndmf.proto;
+
+import "proto/base_types.proto";
+import "proto/asset.proto";
+import "proto/component.proto";
+
+message ExportRoot {
+  repeated Asset assets = 1;
+  GameObject root = 2;
+}
+
+message GameObject {
+  string name = 1;
+  ObjectID id = 2;
+  Transform local_transform = 3;
+  bool enabled = 4;
+  
+  repeated Component components = 10;
+  repeated GameObject children = 11;
+}
+
+message Component {
+  bool enabled = 1;
+  ObjectID id = 2;
+
+  oneof component {
+    MeshRenderer mesh_renderer = 10;
+    VisibleInFirstPerson visible_in_first_person = 11;
+  }
+}

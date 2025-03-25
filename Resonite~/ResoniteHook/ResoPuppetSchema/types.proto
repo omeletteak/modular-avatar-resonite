@@ -1,0 +1,34 @@
+syntax = "proto3";
+option csharp_namespace = "ResoPuppetSchema";
+
+package ResoPuppetSchema;
+
+message Empty {}
+
+message RefID {
+  uint64 id = 1;
+}
+
+message Vector {
+  float x = 1;
+  float y = 2;
+  optional float z = 3;
+  optional float w = 4;
+}
+
+message Quaternion {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+  float w = 4;
+}
+
+message Transform {
+  Vector position = 1;
+  Quaternion rotation = 2;
+  Vector scale = 3;
+}
+
+message Matrix {
+  repeated float values = 1;
+}
