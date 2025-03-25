@@ -28,6 +28,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore "${{ env.RPC_SERVER_SRC }}" -v normal
 
+    - name: Restore dependencies (.NET 4.7.2)
+      run: dotnet restore "${{ env.RPC_SERVER_SRC }}/ResoPuppetSchema" --packages "${{ env.RPC_SERVER_SRC }}/packages" -v normal
+
+    - run: dir "${{ env.RPC_SERVER_SRC }}/packages"
+
     - name: Cache resonite
       id: cache-resonite
       uses: actions/cache/restore@v4
