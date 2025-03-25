@@ -19,9 +19,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x 
+
     - name: Restore dependencies
-      run: dotnet restore "${{ env.RPC_SERVER_SRC }}" --packages "${{ env.RPC_SERVER_SRC }}/packages" -v detailed
+      run: dotnet restore "${{ env.RPC_SERVER_SRC }}" --packages "${{ env.RPC_SERVER_SRC }}/packages" -v normal
+
+    - run: dir "${{ env.RPC_SERVER_SRC }}/packages"
 
     - name: Cache resonite
       id: cache-resonite
@@ -62,10 +69,6 @@ jobs:
       run: |
         c:\steamcmd\steamcmd +force_install_dir "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed" +login ${{ secrets.STEAMUSER }} ${{ secrets.STEAMPASS }} +app_update 2519830 +quit
     
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.x 
 
     - name: Build
       run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet build --no-restore
