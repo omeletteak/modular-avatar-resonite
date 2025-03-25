@@ -11,6 +11,7 @@ on:
 
 env:
   RPC_SERVER_SRC: Resonite~/ResoniteHook
+  RESONITE_PATH: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite\\Resonite_Data\\Managed"
 
 jobs:
   build:
@@ -41,7 +42,7 @@ jobs:
       id: cache-resonite
       uses: actions/cache/restore@v4
       with:
-        path: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite\\Resonite_Data\\Managed"
+        path: "${{ env.RESONITE_PATH }}"
         key: resonite
 
     - name: Cache steamcmd
@@ -58,7 +59,7 @@ jobs:
         cd c:\
         Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile c:\steamcmd.zip
         Expand-Archive c:\steamcmd.zip -Force
-        New-Item -ItemType Directory -Path "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed"
+        New-Item -ItemType Directory -Path "${{ env.RESONITE_PATH }}"
         dir c:\steamcmd
 
     - name: Update steamcmd
@@ -75,7 +76,9 @@ jobs:
       id: install-resonite
       if: steps.cache-resonite.outputs.cache-hit != 'true'
       run: |
-        c:\steamcmd\steamcmd +force_install_dir "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed" +login ${{ secrets.STEAMUSER }} ${{ secrets.STEAMPASS }} +app_update 2519830 +quit
+        c:\steamcmd\steamcmd +force_install_dir "${{ env.RESONITE_PATH }}" +login ${{ secrets.STEAMUSER }} ${{ secrets.STEAMPASS }} +app_update 2519830 +quit
+
+    - run: dir "${{ env.RESONITE_PATH }}"
 
     - name: Build
       run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet build --no-restore --verbosity normal
@@ -94,5 +97,5 @@ jobs:
       uses: actions/cache/save@v4
       with:
         key: ${{ steps.cache-resonite.outputs.cache-primary-key }}
-        path: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite\\Resonite_Data\\Managed"
+        path: "${{ env.RESONITE_PATH }}"
     
