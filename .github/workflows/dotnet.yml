@@ -38,6 +38,7 @@ jobs:
       run: dotnet restore "${{ env.RPC_SERVER_SRC }}" -v normal
 
     - run: dir "${{ env.RPC_SERVER_SRC }}/packages"
+    - run: dir "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed"
 
     - name: Cache resonite
       id: cache-resonite
