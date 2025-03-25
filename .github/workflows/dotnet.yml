@@ -26,7 +26,7 @@ jobs:
         dotnet-version: 9.0.x 
 
     - name: Restore dependencies
-      run: dotnet restore "${{ env.RPC_SERVER_SRC }}" --packages "${{ env.RPC_SERVER_SRC }}/packages" -v normal
+      run: dotnet restore "${{ env.RPC_SERVER_SRC }}" -v normal
 
     - name: Restore tool dependencies
       run: cd "${{ env.RPC_SERVER_SRC }}" ; dotnet tool restore  -v normal
@@ -73,6 +73,11 @@ jobs:
       run: |
         c:\steamcmd\steamcmd +force_install_dir "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed" +login ${{ secrets.STEAMUSER }} ${{ secrets.STEAMPASS }} +app_update 2519830 +quit
 
+    - name: Build
+      run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet build
+    - name: Test
+      run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet test --no-build --verbosity normal
+
     - name: Save steamcmd cache
       if: steps.install-resonite.outcome == 'success'
       uses: actions/cache/save@v4
@@ -87,7 +92,3 @@ jobs:
         key: ${{ steps.cache-resonite.outputs.cache-primary-key }}
         path: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite\\Resonite_Data\\Managed"
     
-    - name: Build
-      run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet build
-    - name: Test
-      run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet test --no-build --verbosity normal
