@@ -23,9 +23,25 @@ jobs:
     - name: Restore dependencies
       run: |
         dir
-        cd "${{ env.RPC_SERVER_SRC }}"; dir; dotnet restore
+        cd "${{ env.RPC_SERVER_SRC }}"; dir; dotnet restore; dir
+
+    - name: Cache resonite
+      id: cache-resonite
+      uses: actions/cache@v4
+      with:
+        path: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite\\Resonite_Data\\Managed"
+        key: resonite
+
+    - name: Cache steamcmd
+      id: cache-steamcmd
+      if: steps.cache-resonite.outputs.cache-hit != 'true'
+      uses: actions/cache@v4
+      with:
+        path: c:\steamcmd
+        key: steamcmd
 
     - name: Setup steamcmd
+      if: steps.cache-steamcmd.outputs.cache-hit != 'true'
       run: |
         cd c:\
         Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile c:\steamcmd.zip
@@ -34,6 +50,7 @@ jobs:
         dir c:\steamcmd
 
     - name: Update steamcmd
+      if: steps.cache-resonite.outputs.cache-hit != 'true'
       run: |
         $ErrorAction = "Ignore"
         # run updater first
@@ -41,7 +58,9 @@ jobs:
         # steamcmd exits with a nonzero error code even when successful, suppress the error
         Exit 0
 
+
     - name: Install resonite
+      if: steps.cache-resonite.outputs.cache-hit != 'true'
       run: |
         c:\steamcmd\steamcmd +force_install_dir "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed" +login ${{ secrets.STEAMUSER }} ${{ secrets.STEAMPASS }} +app_update 2519830 +quit
     
