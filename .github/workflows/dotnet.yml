@@ -24,12 +24,16 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x 
+        
+    - uses: nuget/setup-nuget@v2
+      with:
+        nuget-version: '5.x'
 
     - name: Restore dependencies
       run: dotnet restore "${{ env.RPC_SERVER_SRC }}" -v normal
 
     - name: Restore dependencies (.NET 4.7.2)
-      run: dotnet restore "${{ env.RPC_SERVER_SRC }}/ResoPuppetSchema" --packages "${{ env.RPC_SERVER_SRC }}/packages" -v normal
+      run: nuget restore -ConfigFile "${{ env.RPC_SERVER_SRC }}/ResoPuppetSchema/packages.config" -PackagesDirectory "${{ env.RPC_SERVER_SRC }}/packages" -Verbosity normal
 
     - run: dir "${{ env.RPC_SERVER_SRC }}/packages"
 
