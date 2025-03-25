@@ -77,7 +77,7 @@ jobs:
       if: steps.install-resonite.outcome == 'success'
       uses: actions/cache/save@v4
       with:
-        key: ${{ steps.cache-steamcmd.outputs.cache-primary-key }}
+        key: steamcmd
         path: c:\steamcmd
 
     - name: Save resonite cache
@@ -88,6 +88,6 @@ jobs:
         path: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite\\Resonite_Data\\Managed"
     
     - name: Build
-      run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet build --no-restore
+      run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet build
     - name: Test
       run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet test --no-build --verbosity normal
