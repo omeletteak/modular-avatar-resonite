@@ -29,7 +29,7 @@ jobs:
       run: dotnet restore "${{ env.RPC_SERVER_SRC }}" --packages "${{ env.RPC_SERVER_SRC }}/packages" -v normal
 
     - name: Restore tool dependencies
-      run: dotnet tool restore "${{ env.RPC_SERVER_SRC }}" --packages "${{ env.RPC_SERVER_SRC }}/packages" -v normal
+      run: cd "${{ env.RPC_SERVER_SRC }}" ; dotnet tool restore  -v normal
 
     - run: dir "${{ env.RPC_SERVER_SRC }}/packages"
 
