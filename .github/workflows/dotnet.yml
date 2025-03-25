@@ -44,7 +44,7 @@ jobs:
         key: steamcmd
 
     - name: Setup steamcmd
-      if: steps.cache-steamcmd.outputs.cache-hit != 'true'
+      if: steps.cache-steamcmd.outputs.cache-hit != 'true' && steps.cache-resonite.outputs.cache-hit != 'true'
       run: |
         cd c:\
         Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile c:\steamcmd.zip
