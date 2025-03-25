@@ -22,11 +22,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 9.0.x
-    - name: Setup .NET (legacy)
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 4.7.2      
+        dotnet-version: 9.0.x 
     - name: Fetch resonite
       run: |
         mkdir C:\steamcmd
