@@ -27,7 +27,7 @@ jobs:
         Expand-Archive c:\steamcmd\steamcmd.zip -Force
         New-Item -ItemType Directory -Path "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed"
         dir c:\steamcmd
-        c:\steamcmd\steamcmd\steamcmd +force_install_dir "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed" +login ${{ secrets.STEAMUSER }} ${{ secrets.STEAMPASS }} +app_update 2519830
+        c:\steamcmd\steamcmd\steamcmd +force_install_dir "C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed" +login ${{ secrets.STEAMUSER }} ${{ secrets.STEAMPASS }} +app_update 2519830 +quit
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
