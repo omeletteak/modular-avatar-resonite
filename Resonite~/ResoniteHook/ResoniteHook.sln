@@ -12,8 +12,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Puppeteer", "Puppeteer\Pupp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResoPuppetSchema", "ResoPuppetSchema\ResoPuppetSchema.csproj", "{274201D6-7529-4420-80FC-D51ADEBA78A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reso2Proto", "Reso2Proto\Reso2Proto.csproj", "{C7425EF3-5829-48A2-8B52-F76096AA736F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

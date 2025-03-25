@@ -41,5 +41,6 @@ message Transform {
   Vector scale = 3;
 }
 message Matrix {
+  // row-major order
   repeated float values = 1;
 }

@@ -30,6 +30,7 @@ message Submesh {
 }
 
 message TriangleList {
+  // clockwise winding order (same as Unity)
   repeated Triangle triangles = 1;
 }
 
