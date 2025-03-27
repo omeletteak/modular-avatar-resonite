@@ -3,7 +3,7 @@ option csharp_namespace = "nadena.dev.ndmf.proto";
 
 package nadena.dev.ndmf.proto;
 
-message Empty {}
+import public "google/protobuf/empty.proto";
 
 message Blob {
   oneof source {
@@ -34,7 +34,16 @@ message Color {
   float g = 2;
   float b = 3;
   float a = 4;
+  
+  optional ColorProfile profile = 5;
 }
+
+enum ColorProfile {
+  Linear = 0;
+  sRGB = 1;
+  sRGBA = 2;
+}
+
 message Transform {
   Vector position = 1;
   Quaternion rotation = 2;

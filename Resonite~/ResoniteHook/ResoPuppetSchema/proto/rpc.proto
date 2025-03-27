@@ -1,0 +1,16 @@
+syntax = "proto3";
+option csharp_namespace = "nadena.dev.ndmf.proto.rpc";
+
+package nadena.dev.ndmf.proto;
+
+import "proto/objects.proto";
+import "proto/base_types.proto";
+
+service ResoPuppeteer {
+  rpc ConvertObject (ConvertObjectRequest) returns (google.protobuf.Empty);
+}
+
+message ConvertObjectRequest {
+  ExportRoot root = 1;
+  string path = 2;
+}

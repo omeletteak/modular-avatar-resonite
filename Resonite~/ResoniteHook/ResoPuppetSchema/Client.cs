@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Security.Principal;
 using GrpcDotNetNamedPipes;
+using nadena.dev.ndmf.proto.rpc;
 
 namespace ResoPuppetSchema
 {
     public class Connector
     {
         private NamedPipeChannel _channel;
-        private ResoPuppet.ResoPuppetClient _client;
+        private ResoPuppeteer.ResoPuppeteerClient _client;
 
-        public ResoPuppet.ResoPuppetClient Client => _client;
+        public ResoPuppeteer.ResoPuppeteerClient Client => _client;
         
         public Connector()
         {
@@ -17,7 +18,7 @@ namespace ResoPuppetSchema
             {
                 ImpersonationLevel = TokenImpersonationLevel.None
             });
-            _client = new ResoPuppet.ResoPuppetClient(_channel);
+            _client = new ResoPuppeteer.ResoPuppeteerClient(_channel);
         }
     }
 }

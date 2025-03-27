@@ -7,6 +7,8 @@ import "proto/base_types.proto";
 import "proto/asset.proto";
 import "proto/component.proto";
 
+import "google/protobuf/any.proto";
+
 message ExportRoot {
   repeated Asset assets = 1;
   GameObject root = 2;
@@ -26,8 +28,5 @@ message Component {
   bool enabled = 1;
   ObjectID id = 2;
 
-  oneof component {
-    MeshRenderer mesh_renderer = 10;
-    VisibleInFirstPerson visible_in_first_person = 11;
-  }
+  google.protobuf.Any component = 3;
 }

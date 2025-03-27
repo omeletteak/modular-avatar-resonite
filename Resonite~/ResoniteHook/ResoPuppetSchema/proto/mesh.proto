@@ -9,10 +9,11 @@ message Mesh {
   repeated Vector positions = 1;
   repeated Vector normals = 2;
   repeated Vector tangents = 3;
-  repeated Vector colors = 4;
+  repeated Color colors = 4;
   repeated UVChannel uvs = 5;
   repeated Submesh submeshes = 6;
   repeated Bone bones = 7;
+  repeated VertexBoneWeights vertex_bone_weights = 8;
   
   // TODO: Blendshapes
   // TODO: Bone data
@@ -43,4 +44,13 @@ message Triangle {
 message Bone {
   string name = 1;
   Matrix bindpose = 2;
+}
+
+message VertexBoneWeights {
+  repeated BoneWeight bone_weights = 1;
+}
+
+message BoneWeight {
+  uint32 bone_index = 1;
+  float weight = 2;
 }

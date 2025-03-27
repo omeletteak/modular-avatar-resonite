@@ -5,32 +5,33 @@ package nadena.dev.ndmf.proto;
 
 import "proto/base_types.proto";
 import "proto/mesh.proto";
+import "google/protobuf/any.proto";
 
 message Asset {
   string name = 1;
   AssetID id = 2;
   
-  oneof asset {
-    Mesh mesh = 10;
-    Material material = 11;
-    Texture texture = 12;
-  }
+  google.protobuf.Any asset = 3;
 }
 
 message Material {
-  oneof main_texture {
-    Texture texture = 1;
-    Color color = 2;
-  }
+  optional AssetID main_texture = 1;
+  optional Color main_color = 2;
   //Texture normal_map = 2;
   //uint32 render_queue = 3;
   
   // TODO...
 }
 
+enum TextureFormat {
+  PNG = 0;
+  JPEG = 1;
+}
+
 message Texture {
+  TextureFormat format = 1;
+  
   oneof contents {
-    Blob png = 1;
-    Blob jpeg = 2;
+    Blob bytes = 2;
   }
 }

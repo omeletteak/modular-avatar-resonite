@@ -4,6 +4,12 @@
     <option name="importPathEntries">
       <list>
         <ImportPathEntry>
+          <option name="location" value="file://$USER_HOME$/.nuget/packages/google.protobuf.tools/3.30.1/tools" />
+        </ImportPathEntry>
+        <ImportPathEntry>
+          <option name="location" value="file://$PROJECT_DIR$/ResoPuppetSchema/proto" />
+        </ImportPathEntry>
+        <ImportPathEntry>
           <option name="location" value="file://$PROJECT_DIR$/ResoPuppetSchema/proto" />
         </ImportPathEntry>
         <ImportPathEntry>
