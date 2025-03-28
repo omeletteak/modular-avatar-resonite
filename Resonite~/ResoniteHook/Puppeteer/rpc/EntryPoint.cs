@@ -13,21 +13,22 @@ public class EntryPoint : nadena.dev.ndmf.proto.rpc.ResoPuppeteer.ResoPuppeteerB
     private static readonly Empty Empty = new Empty();
     private readonly Engine _engine;
     private readonly World _world;
-    private readonly AutoResetEvent _requestFrame;
+    private readonly TickController _tickController;
     
     private HashSet<Slot> _slots = new();
     
-    public EntryPoint(Engine engine, World world, AutoResetEvent requestFrame)
+    public EntryPoint(Engine engine, World world, TickController tickController)
     {
         _engine = engine;
         _world = world;
-        _requestFrame = requestFrame;
+        _tickController = tickController;
     }
 
     Task<T> RunAsync<T>(Func<Task<T>> func)
     {
         TaskCompletionSource<T> result = new();
-        
+
+        IDisposable disposable = _tickController.StartRPC();
         _world.Coroutines.StartTask(async f =>
         {
             Func<Task<T>> func = f!;
@@ -40,9 +41,12 @@ public class EntryPoint : nadena.dev.ndmf.proto.rpc.ResoPuppeteer.ResoPuppeteerB
                 Console.WriteLine(e);
                 result.SetException(e);
             }
+            finally
+            {
+                disposable.Dispose();
+            }
         }, func);
-
-        _requestFrame.Set();
+        _tickController.RequestFrameNow();
         
         return result.Task;
     }
@@ -52,6 +56,7 @@ public class EntryPoint : nadena.dev.ndmf.proto.rpc.ResoPuppeteer.ResoPuppeteerB
     {
         TaskCompletionSource<T> result = new();
         
+        IDisposable disposable = _tickController.StartRPC();
         _world.Coroutines.Post(f =>
         {
             Func<T> func = (Func<T>)f!;
@@ -64,9 +69,12 @@ public class EntryPoint : nadena.dev.ndmf.proto.rpc.ResoPuppeteer.ResoPuppeteerB
                 Console.WriteLine(e);
                 result.SetException(e);
             }
+            finally
+            {
+                disposable.Dispose();
+            }
         }, func);
-
-        _requestFrame.Set();
+        _tickController.RequestFrameNow();
 
         return result.Task;
     }

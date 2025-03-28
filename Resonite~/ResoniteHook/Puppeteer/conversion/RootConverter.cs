@@ -1,5 +1,8 @@
-﻿using Assimp.Configs;
+﻿using System.Reflection;
+using Assimp;
+using Assimp.Configs;
 using Elements.Core;
+using FrooxEngine.CommonAvatar;
 using FrooxEngine.Store;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
@@ -99,18 +102,23 @@ public partial class RootConverter : IDisposable
 
         await ConvertAssets(exportRoot.Assets);
 
-        _root = ConvertGameObject(exportRoot.Root, _world.RootSlot);
+        _root = await ConvertGameObject(exportRoot.Root, _world.RootSlot);
+
+        _assetRoot.SetParent(_root);
+        
+        // Reset root transform
+        _root.Position_Field.Value = new float3();
+        _root.Rotation_Field.Value = new floatQ(0, 0, 0, 1);
+        
         foreach (var action in _deferredConfiguration)
         {
             action();
         }
-        
-        _assetRoot.SetParent(_root);
-        
-        // Temporary
-        _root.AttachComponent<f.ObjectRoot>();
-        _root.AttachComponent<f.Grabbable>();
 
+        //_root.AttachComponent<f.DestroyRoot>();
+        _root.AttachComponent<SimpleAvatarProtection>();
+        _root.AttachComponent<f.ObjectRoot>();
+        
         SavedGraph savedGraph = _root.SaveObject(f.DependencyHandling.CollectAssets);
         Record record = RecordHelper.CreateForObject<Record>(_root.Name, "", null);
 
@@ -122,7 +130,7 @@ public partial class RootConverter : IDisposable
         }
     }
 
-    private f.Slot ConvertGameObject(p.GameObject gameObject, f::Slot parent)
+    private async Task<f.Slot> ConvertGameObject(p.GameObject gameObject, f::Slot parent)
     {
         var slot = parent.AddSlot(gameObject.Name);
 
@@ -134,12 +142,12 @@ public partial class RootConverter : IDisposable
 
         foreach (var component in gameObject.Components)
         {
-            if (component != null) ConvertComponent(slot, component);
+            if (component != null) await ConvertComponent(slot, component);
         }
 
         foreach (var child in gameObject.Children)
         {
-            if (child != null) ConvertGameObject(child, slot);
+            if (child != null) await ConvertGameObject(child, slot);
         }
 
         return slot;
@@ -230,5 +238,89 @@ public partial class RootConverter : IDisposable
         meshComponent.URL.Value = uri;
 
         return meshComponent;
+    }
+
+    private async Task<f.IComponent> SetupRig(f.Slot parent, p.RigRoot component)
+    {
+        // This is a virtual component that tags a slot as being the root of a rigged model
+        await new f.ToWorld();
+        
+        foreach (f.SkinnedMeshRenderer smr in parent.GetComponentsInChildren<f.SkinnedMeshRenderer>())
+        {
+            while (!smr.Mesh.IsAssetAvailable)
+            {
+                await new f::ToBackground();
+                await new f::ToWorld();
+            }
+        }
+
+        var rig = parent.AttachComponent<f.Rig>();
+        var relay = parent.AttachComponent<f.MeshRendererMaterialRelay>();
+        
+        foreach (f.SkinnedMeshRenderer smr in parent.GetComponentsInChildren<f.SkinnedMeshRenderer>())
+        {
+            smr.BoundsComputeMethod.Value = f.SkinnedBounds.Static;
+            rig.Bones.AddRangeUnique(smr.Bones);
+            relay.Renderers.Add(smr);
+        }
+        
+        _deferredConfiguration.Add(() =>
+        {
+            // Invoke ModelImporter to set up the rig
+            var settings = new f.ModelImportSettings()
+            {
+                //ForceTpose = true,
+                SetupIK = true,
+                GenerateColliders = true,
+                //GenerateSkeletonBoneVisuals = true,
+                //GenerateSnappables = true,
+            };
+            
+            Console.WriteLine("Root position: " + parent.Position_Field.Value);
+            
+            Type ty_modelImportData = typeof(f.ModelImporter).GetNestedType("ModelImportData", BindingFlags.NonPublic);
+            var mid_ctor = ty_modelImportData.GetConstructors()[0];
+            var modelImportData = mid_ctor.Invoke(new object[]
+            {
+                "",
+                null,
+                parent,
+                _assetRoot,
+                settings,
+                new NullProgress()
+            });
+
+            ty_modelImportData.GetField("settings")!.SetValue(modelImportData, settings);
+        
+            typeof(f.ModelImporter).GetMethod(
+                "GenerateRigBones", 
+                BindingFlags.Static | BindingFlags.NonPublic,
+                null,
+                new []
+                {
+                    typeof(f.Rig), ty_modelImportData
+                },
+                null
+                )!.Invoke(null, [
+                    rig, modelImportData
+                ]);
+        });
+        
+        return rig;
+    }
+}
+
+class NullProgress : Elements.Core.IProgressIndicator
+{
+    public void UpdateProgress(float percent, LocaleString progressInfo, LocaleString detailInfo)
+    {
+    }
+
+    public void ProgressDone(LocaleString message)
+    {
+    }
+
+    public void ProgressFail(LocaleString message)
+    {
     }
 }

@@ -14,6 +14,50 @@ namespace nadena.dev.resonity.remote.puppeteer;
 using Elements.Core;
 using FrooxEngine;
 
+public class TickController
+{
+    private int activeRPCs = 0;
+    private AutoResetEvent requestFrame = new(false);
+
+    public void WaitFrame()
+    {
+        if (activeRPCs > 0)
+        {
+            Thread.Sleep(10);
+        }
+        else
+        {
+            requestFrame.WaitOne(1000);
+        }
+    }
+    
+    public IDisposable StartRPC()
+    {
+        activeRPCs++;
+        return new RPCFinisher(this);
+    }
+
+    public void RequestFrameNow()
+    {
+        requestFrame.Set();
+    }
+
+    private class RPCFinisher : IDisposable
+    {
+        private readonly TickController controller;
+
+        public RPCFinisher(TickController controller)
+        {
+            this.controller = controller;
+        }
+
+        void IDisposable.Dispose()
+        {
+            controller.activeRPCs--;
+        }
+    }
+}
+
 internal class Program
 {
     internal static async Task Main(string[] args)
@@ -34,7 +78,7 @@ internal class Program
 
         TaskCompletionSource shutdown = new();
 
-        AutoResetEvent requestFrame = new(false);
+        var tickController = new TickController();
         StandaloneSystemInfo info = new StandaloneSystemInfo();
         LaunchOptions options = new LaunchOptions();
         options.DataDirectory = StandaloneFrooxEngineRunner.DefaultDataDirectory;
@@ -58,7 +102,7 @@ internal class Program
             {
                 engine.RunUpdateLoop();
                 info.FrameFinished();
-                requestFrame.WaitOne(10);
+                tickController.WaitFrame();
             }
         });
         
@@ -84,7 +128,7 @@ internal class Program
             //engine.RequestShutdown();
         }, world);
         
-        new RPCServer().Start(new EntryPoint(engine, world, requestFrame));
+        new RPCServer().Start(new EntryPoint(engine, world, tickController));
         
         await shutdown.Task;
         

@@ -12,8 +12,8 @@ public partial class RootConverter
 {
     private Dictionary<string, ComponentBuilder> ComponentTypes = new();
 
-    private delegate f::IComponent ComponentBuilder(f::Slot parent, p::Component component);
-    private delegate f::IComponent TypedComponentBuilder<M>(f::Slot parent, M component) where M : IMessage, new();
+    private delegate Task<f::IComponent> ComponentBuilder(f::Slot parent, p::Component component);
+    private delegate Task<f::IComponent> TypedComponentBuilder<M>(f::Slot parent, M component) where M : IMessage, new();
 
     private Dictionary<string, AssetBuilder> AssetTypes = new();
     
@@ -38,6 +38,7 @@ public partial class RootConverter
     {
         // Components
         RegisterComponentType<p::MeshRenderer>(CreateMeshRenderer);
+        RegisterComponentType<p::RigRoot>(SetupRig);
         
         
         // Assets
@@ -47,7 +48,7 @@ public partial class RootConverter
     }
     
     
-    private void ConvertComponent(f::Slot parent, p.Component component)
+    private async Task ConvertComponent(f::Slot parent, p.Component component)
     {
         var typeName = Google.Protobuf.WellKnownTypes.Any.GetTypeName(component.Component_.TypeUrl);
 
@@ -57,7 +58,7 @@ public partial class RootConverter
             return;
         }
         
-        var fComponent = componentBuilder(parent, component);
+        var fComponent = await componentBuilder(parent, component);
         _objects[component.Id] = fComponent;
     }
 

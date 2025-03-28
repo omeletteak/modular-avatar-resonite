@@ -81,6 +81,16 @@ public class TestClient
 
         _exportRoot.Root = CreateTransforms(go.transform);
 
+        if (go.TryGetComponent<Animator>(out _))
+        {
+            _exportRoot.Root.Components.Add(new p.Component()
+            {
+                Enabled = true,
+                Id = MintObjectID(),
+                Component_ = Any.Pack(new p.RigRoot())
+            });
+        }
+
         ProcessAssets();
 
         client.ConvertObject(new()

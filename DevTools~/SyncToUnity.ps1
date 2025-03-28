@@ -1,4 +1,4 @@
-dotnet build Resonite~\ResoniteHook\ResoniteHook.sln
+dotnet build Resonite~\ResoniteHook\ResoPuppetSchema.csproj
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }

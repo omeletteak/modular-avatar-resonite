@@ -5,7 +5,7 @@ namespace nadena.dev.resonity.remote.puppeteer.rpc;
 
 public partial class RootConverter
 {
-    private f::IComponent CreateMeshRenderer(f::Slot parent, p::MeshRenderer component)
+    private async Task<f::IComponent> CreateMeshRenderer(f::Slot parent, p::MeshRenderer component)
     {
         if (component.BlendshapeWeights.Count == 0 && component.Bones.Count == 0)
         {
@@ -17,9 +17,6 @@ public partial class RootConverter
                 var material = Asset<f.IAssetProvider<f.Material>>(matId);
                 mr.Materials.Add(material);
             }
-            
-            // Temporary for debugging
-            parent.AttachComponent<f::MeshCollider>();
 
             return mr;
         }
@@ -54,7 +51,7 @@ public partial class RootConverter
             }
 
             // Temporary for debugging
-            parent.AttachComponent<f::MeshCollider>();
+            //parent.AttachComponent<f::MeshCollider>();
 
             return mr;
         }

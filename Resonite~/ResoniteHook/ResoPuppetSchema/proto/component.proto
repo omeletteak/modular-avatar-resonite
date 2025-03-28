@@ -15,3 +15,7 @@ message MeshRenderer {
 message VisibleInFirstPerson {
   bool visible = 1;
 }
+
+message RigRoot {
+  
+}
