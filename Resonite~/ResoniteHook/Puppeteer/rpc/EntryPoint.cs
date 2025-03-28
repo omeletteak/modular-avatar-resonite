@@ -83,6 +83,7 @@ public class EntryPoint : nadena.dev.ndmf.proto.rpc.ResoPuppeteer.ResoPuppeteerB
     {
         using var converter = new RootConverter(_engine, _world);
 
+        using var _tick = _tickController.StartRPC();
         await converter.Convert(request.Root, request.Path);
 
         return new Empty();

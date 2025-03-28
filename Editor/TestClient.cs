@@ -10,6 +10,7 @@ using nadena.dev.ndmf.proto.rpc;
 using ResoPuppetSchema;
 using UnityEditor;
 using UnityEngine;
+using VRC.SDK3.Avatars.Components;
 using BoneWeight = nadena.dev.ndmf.proto.mesh.BoneWeight;
 using Mesh = UnityEngine.Mesh;
 using p = nadena.dev.ndmf.proto;
@@ -61,6 +62,7 @@ public class TestClient
     private p.ObjectID MapObject(UnityEngine.Object? obj)
     {
         if (obj == null) return new p.ObjectID() { Id = 0 };
+        if (obj is Transform t) obj = t.gameObject;
         if (_unityToObject.TryGetValue(obj, out var id)) return id;
         
         _unityToObject[obj] = id = MintObjectID();
@@ -81,13 +83,19 @@ public class TestClient
 
         _exportRoot.Root = CreateTransforms(go.transform);
 
-        if (go.TryGetComponent<Animator>(out _))
+        if (go.TryGetComponent<Animator>(out var anim) && go.TryGetComponent<VRCAvatarDescriptor>(out var avDesc))
         {
             _exportRoot.Root.Components.Add(new p.Component()
             {
                 Enabled = true,
                 Id = MintObjectID(),
-                Component_ = Any.Pack(new p.RigRoot())
+                Component_ = Any.Pack(new p.RigRoot()
+                {
+                    Head = MapObject(anim.GetBoneTransform(HumanBodyBones.Head)),
+                    HandRight = MapObject(anim.GetBoneTransform(HumanBodyBones.RightHand)),
+                    HandLeft = MapObject(anim.GetBoneTransform(HumanBodyBones.LeftHand)),
+                    EyePosition = avDesc.ViewPosition.ToRPC()
+                })
             });
         }
 

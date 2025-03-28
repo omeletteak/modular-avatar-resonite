@@ -1,4 +1,4 @@
-dotnet build Resonite~\ResoniteHook\ResoPuppetSchema.csproj
+dotnet build Resonite~\ResoniteHook\ResoPuppetSchema\ResoPuppetSchema.csproj --no-restore
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
