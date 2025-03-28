@@ -185,7 +185,7 @@ public class TestClient
         var blendshapes = sharedMesh.blendShapeCount;
         for (int i = 0; i < blendshapes; i++)
         {
-            protoMeshRenderer.BlendshapeWeights.Add(r.GetBlendShapeWeight(i));
+            protoMeshRenderer.BlendshapeWeights.Add(r.GetBlendShapeWeight(i) / 100.0f);
         }
 
         return protoMeshRenderer;
@@ -345,6 +345,44 @@ public class TestClient
 
                 msgMesh.VertexBoneWeights.Add(vbw);
             }
+        }
+
+        Vector3[] delta_position = new Vector3[mesh.vertexCount];
+        Vector3[] delta_normal = new Vector3[mesh.vertexCount];
+        Vector3[] delta_tangent = new Vector3[mesh.vertexCount];
+        
+        int blendshapeCount = mesh.blendShapeCount;
+        for (int i = 0; i < blendshapeCount; i++)
+        {
+            var name = mesh.GetBlendShapeName(i);
+            var frames = mesh.GetBlendShapeFrameCount(i);
+            
+            var rpcBlendshape = new p.mesh.Blendshape()
+            {
+                Name = name,
+                Frames = { }
+            };
+
+            for (int f = 0; f < frames; f++)
+            {
+                var frame = new p.mesh.BlendshapeFrame();
+                frame.Weight = mesh.GetBlendShapeFrameWeight(i, f) / 100.0f;
+                mesh.GetBlendShapeFrameVertices(i, f, delta_position, delta_normal, delta_tangent);
+                
+                frame.DeltaPositions.AddRange(delta_position.Select(v => v.ToRPC()));
+                if (delta_normal.Any(n => n.sqrMagnitude > 0.0001f))
+                {
+                    frame.DeltaNormals.AddRange(delta_normal.Select(v => v.ToRPC()));
+                }
+                if (delta_tangent.Any(t => t.sqrMagnitude > 0.0001f))
+                {
+                    frame.DeltaTangents.AddRange(delta_tangent.Select(v => v.ToRPC()));
+                }
+                
+                rpcBlendshape.Frames.Add(frame);
+            }
+            
+            msgMesh.Blendshapes.Add(rpcBlendshape);
         }
 
         return msgMesh;

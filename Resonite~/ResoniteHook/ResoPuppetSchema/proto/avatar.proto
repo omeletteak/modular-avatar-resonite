@@ -71,4 +71,5 @@ message VisemeConfig {
   optional string viseme_ih = 14;
   optional string viseme_oh = 15;
   optional string viseme_ou = 16;
+  optional string viseme_laugh = 17;
 }

@@ -94,7 +94,8 @@ internal class Program
         
         await engine.Initialize(resoDirectory, options, info, null, new ConsoleEngineInitProgress()).ConfigureAwait(false);
 
-        World world = Userspace.SetupUserspace(engine);
+        //World world = Userspace.SetupUserspace(engine);
+        World world = engine.WorldManager.StartLocal(w => { });
 
         var updateLoop = new Thread(() =>
         {

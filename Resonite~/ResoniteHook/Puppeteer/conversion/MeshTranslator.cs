@@ -81,6 +81,28 @@ public static class MeshTranslator
             meshx.FillInEmptyBindings(0);
         }
 
+        foreach (var blendshape in rpcMesh.Blendshapes)
+        {
+            var blendshapeX = meshx.AddBlendShape(blendshape.Name);
+
+            foreach (var frame in blendshape.Frames)
+            {
+                if (frame.DeltaNormals.Count > 0) blendshapeX.HasNormals = true;
+                if (frame.DeltaTangents.Count > 0) blendshapeX.HasTangents = true;
+                
+                var frameX = blendshapeX.AddFrame(frame.Weight);
+                frameX.SetPositionDeltas(frame.DeltaPositions.Select(v => (float3)v.Vec3()).ToArray());
+                if (frame.DeltaNormals.Count > 0)
+                {
+                    frameX.SetNormalDeltas(frame.DeltaNormals.Select(v => (float3)v.Vec3()).ToArray());
+                }
+                if (frame.DeltaTangents.Count > 0)
+                {
+                    frameX.SetTangentDeltas(frame.DeltaTangents.Select(v => (float3)v.Vec3()).ToArray());
+                }
+            }
+        }
+
         return meshx;
     }  
 }

@@ -14,9 +14,7 @@ message Mesh {
   repeated Submesh submeshes = 6;
   repeated Bone bones = 7;
   repeated VertexBoneWeights vertex_bone_weights = 8;
-  
-  // TODO: Blendshapes
-  // TODO: Bone data
+  repeated Blendshape blendshapes = 9;
 }
 
 message UVChannel {
@@ -53,4 +51,16 @@ message VertexBoneWeights {
 message BoneWeight {
   uint32 bone_index = 1;
   float weight = 2;
+}
+
+message Blendshape {
+  string name = 1;
+  repeated BlendshapeFrame frames = 2;
+}
+
+message BlendshapeFrame {
+  float weight = 1;
+  repeated Vector delta_positions = 2;
+  repeated Vector delta_normals = 3;
+  repeated Vector delta_tangents = 4;
 }
