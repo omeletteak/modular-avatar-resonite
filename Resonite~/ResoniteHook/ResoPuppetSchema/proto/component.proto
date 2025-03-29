@@ -17,9 +17,5 @@ message VisibleInFirstPerson {
 }
 
 message RigRoot {
-  ObjectID head = 1;
-  ObjectID hand_left = 2;
-  ObjectID hand_right = 3;
-  
-  Vector eye_position = 4;
+
 }

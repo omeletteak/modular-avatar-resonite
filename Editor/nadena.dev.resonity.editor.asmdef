@@ -1,14 +1,29 @@
 {
     "name": "nadena.dev.resonity.editor",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "nadena.dev.ndmf",
+        "nadena.dev.ndmf.runtime",
+        "nadena.dev.modular-avatar.core",
+        "nadena.dev.modular-avatar.core.editor"
+    ],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "ResoPuppetSchema.dll",
+        "Grpc.Core.Api.dll",
+        "Grpc.Core.dll",
+        "GrpcDotNetNamedPipes.dll",
+        "VRCSDK3A.dll",
+        "Google.Protobuf.dll",
+        "VRCSDK3A-Editor.dll",
+        "VRCSDKBase.dll",
+        "VRCSDKBase-Editor.dll"
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],

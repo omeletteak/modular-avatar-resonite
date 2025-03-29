@@ -130,6 +130,7 @@ public partial class RootConverter : IDisposable
     {
         var slot = parent.AddSlot(gameObject.Name);
 
+        slot.ActiveSelf = gameObject.Enabled;
         slot.Position_Field.Value = gameObject.LocalTransform.Position.Vec3();
         slot.Rotation_Field.Value = gameObject.LocalTransform.Rotation.Quat();
         slot.Scale_Field.Value = gameObject.LocalTransform.Scale.Vec3();

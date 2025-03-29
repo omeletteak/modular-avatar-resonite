@@ -99,7 +99,11 @@ public partial class RootConverter
         }
         
         var fComponent = await componentBuilder(parent, component);
-        _objects[component.Id] = fComponent;
+        if (fComponent != null)
+        {
+            fComponent.Enabled = component.Enabled;
+            _objects[component.Id] = fComponent;
+        }
     }
 
     private async Task ConvertAsset(p.Asset asset)
