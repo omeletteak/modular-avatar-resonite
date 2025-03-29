@@ -10,6 +10,31 @@ message AvatarDescriptor {
   Vector eye_position = 1;
   optional VisemeConfig viseme_config = 2;
   optional EyelookConfig eyelook_config = 3;
+  HumanoidBones bones = 4;
+}
+
+message HumanoidBones {
+  ObjectID head = 1;
+
+  Arm left_arm = 4;
+  Arm right_arm = 5;
+}
+
+message Arm {
+  ObjectID shoulder = 1;
+  ObjectID upper_arm = 2;
+  ObjectID lower_arm = 3;
+  ObjectID hand = 4;
+  
+  Finger thumb = 5;
+  Finger index = 6;
+  Finger middle = 7;
+  Finger ring = 8;
+  Finger pinky = 9;
+}
+
+message Finger {
+  repeated ObjectID bones = 1;
 }
 
 message EyelookConfig {
@@ -56,20 +81,20 @@ message LRVector {
 message VisemeConfig {
   ObjectID viseme_mesh = 1;
   
-  optional string viseme_sil = 2;
-  optional string viseme_PP = 3;
-  optional string viseme_FF = 4;
-  optional string viseme_TH = 5;
-  optional string viseme_DD = 6;
-  optional string viseme_kk = 7;
-  optional string viseme_CH = 8;
-  optional string viseme_SS = 9;
-  optional string viseme_nn = 10;
-  optional string viseme_RR = 11;
-  optional string viseme_aa = 12;
-  optional string viseme_E = 13;
-  optional string viseme_ih = 14;
-  optional string viseme_oh = 15;
-  optional string viseme_ou = 16;
-  optional string viseme_laugh = 17;
+  optional string shape_silence = 2;
+  optional string shape_PP = 3;
+  optional string shape_FF = 4;
+  optional string shape_TH = 5;
+  optional string shape_DD = 6;
+  optional string shape_kk = 7;
+  optional string shape_CH = 8;
+  optional string shape_SS = 9;
+  optional string shape_nn = 10;
+  optional string shape_RR = 11;
+  optional string shape_aa = 12;
+  optional string shape_E = 13;
+  optional string shape_ih = 14;
+  optional string shape_oh = 15;
+  optional string shape_ou = 16;
+  optional string shape_laugh = 17;
 }

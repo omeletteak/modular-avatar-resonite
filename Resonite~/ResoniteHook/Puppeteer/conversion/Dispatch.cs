@@ -10,6 +10,11 @@ namespace nadena.dev.resonity.remote.puppeteer.rpc;
 
 public partial class RootConverter
 {
+    private const int PHASE_RESOLVE_REFERENCES = 0;
+    private const int PHASE_RIG_SETUP = 100;
+    private const int PHASE_AVATAR_SETUP = 200;
+    private const int PHASE_ENABLE_RIG = 500;
+    
     private Dictionary<string, ComponentBuilder> ComponentTypes = new();
 
     private delegate Task<f::IComponent> ComponentBuilder(f::Slot parent, p::Component component);
@@ -34,11 +39,46 @@ public partial class RootConverter
             (obj, untyped) => builder(obj, untyped.Asset_.Unpack<M>());
     }
 
+    private SortedDictionary<int, List<Func<Task>>> _deferredActions = new();
+
+    private void Defer(int phase, Func<Task> action)
+    {
+        if (!_deferredActions.TryGetValue(phase, out var actions))
+        {
+            actions = new List<Func<Task>>();
+            _deferredActions[phase] = actions;
+        }
+        
+        actions.Add(action);
+    }
+    
+    private void Defer(int phase, Action action)
+    {
+        Defer(phase, () =>
+        {
+            action();
+            return Task.CompletedTask;
+        });
+    }
+
+    private async Task RunDeferred()
+    {
+        foreach (var kv in _deferredActions)
+        {
+            foreach (var action in kv.Value)
+            {
+                await action();
+                await new f.ToWorld();
+            }
+        }
+    }
+
     private void InitComponentTypes()
     {
         // Components
         RegisterComponentType<p::MeshRenderer>(CreateMeshRenderer);
         RegisterComponentType<p::RigRoot>(SetupRig);
+        RegisterComponentType<p::AvatarDescriptor>(SetupAvatar);
         
         
         // Assets

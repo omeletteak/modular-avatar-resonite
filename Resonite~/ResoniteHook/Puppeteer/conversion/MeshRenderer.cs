@@ -31,7 +31,7 @@ public partial class RootConverter
                 mr.Materials.Add(material);
             }
 
-            _deferredConfiguration.Add(() =>
+            Defer(PHASE_RESOLVE_REFERENCES, () =>
             {
                 foreach (var boneId in component.Bones)
                 {

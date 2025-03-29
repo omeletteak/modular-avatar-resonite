@@ -133,6 +133,9 @@ public class TestClient
                 case SkinnedMeshRenderer smr:
                     protoComponent = TranslateSkinnedMeshRenderer(smr);
                     break;
+                case VRCAvatarDescriptor avDesc:
+                    protoComponent = TranslateAvatarDescriptor(avDesc);
+                    break;
                 default: continue;
             }
 
@@ -153,7 +156,162 @@ public class TestClient
 
         return protoObject;
     }
-    
+
+    private IMessage TranslateAvatarDescriptor(VRCAvatarDescriptor avDesc)
+    {
+        var uAnimator = avDesc.GetComponent<Animator>(); 
+        
+        var avatarDesc = new p.AvatarDescriptor();
+        
+        avatarDesc.EyePosition = avDesc.ViewPosition.ToRPC();
+
+        TransferHumanoidBones(avatarDesc, uAnimator);
+
+        if (avDesc.VisemeSkinnedMesh != null)
+        {
+            var visemes = new p.VisemeConfig();
+            avatarDesc.VisemeConfig = visemes;
+            visemes.VisemeMesh = MapObject(avDesc.VisemeSkinnedMesh);
+
+            visemes.ShapeSilence = avDesc.VisemeBlendShapes[0];
+            visemes.ShapePP = avDesc.VisemeBlendShapes[1];
+            visemes.ShapeFF = avDesc.VisemeBlendShapes[2];
+            visemes.ShapeTH = avDesc.VisemeBlendShapes[3];
+            visemes.ShapeDD = avDesc.VisemeBlendShapes[4];
+            visemes.ShapeKk = avDesc.VisemeBlendShapes[5];
+            visemes.ShapeCH = avDesc.VisemeBlendShapes[6];
+            visemes.ShapeSS = avDesc.VisemeBlendShapes[7];
+            visemes.ShapeNn = avDesc.VisemeBlendShapes[8];
+            visemes.ShapeRR = avDesc.VisemeBlendShapes[9];
+            visemes.ShapeAa = avDesc.VisemeBlendShapes[10];
+            visemes.ShapeE = avDesc.VisemeBlendShapes[11];
+            visemes.ShapeIh = avDesc.VisemeBlendShapes[12];
+            visemes.ShapeOh = avDesc.VisemeBlendShapes[13];
+            visemes.ShapeOu = avDesc.VisemeBlendShapes[14];
+        }
+
+        return avatarDesc;
+    }
+
+    private void TransferHumanoidBones(p.AvatarDescriptor avatarDesc, Animator uAnimator)
+    {
+        var bones = avatarDesc.Bones = new();
+        bones.Head = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.Head).gameObject);
+
+        bones.LeftArm = new();
+        bones.LeftArm.Shoulder = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftShoulder).gameObject);
+        bones.LeftArm.UpperArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftUpperArm).gameObject);
+        bones.LeftArm.LowerArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLowerArm).gameObject);
+        bones.LeftArm.Hand = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftHand).gameObject);
+
+        bones.LeftArm.Index = new()
+        {
+            Bones =
+            {
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftIndexProximal).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftIndexIntermediate).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftIndexDistal).gameObject)
+            }
+        };
+        
+        bones.LeftArm.Middle = new()
+        {
+            Bones =
+            {
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftMiddleIntermediate).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftMiddleDistal).gameObject)
+            }
+        };
+        
+        bones.LeftArm.Ring = new()
+        {
+            Bones =
+            {
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftRingProximal).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftRingIntermediate).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftRingDistal).gameObject)
+            }
+        };
+        
+        bones.LeftArm.Pinky = new()
+        {
+            Bones =
+            {
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLittleProximal).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLittleIntermediate).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLittleDistal).gameObject)
+            }
+        };
+        
+        bones.LeftArm.Thumb = new()
+        {
+            Bones =
+            {
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftThumbProximal).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftThumbDistal).gameObject)
+            }
+        };
+        
+        bones.RightArm = new();
+        
+        bones.RightArm.Shoulder = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightShoulder).gameObject);
+        bones.RightArm.UpperArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightUpperArm).gameObject);
+        bones.RightArm.LowerArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLowerArm).gameObject);
+        bones.RightArm.Hand = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightHand).gameObject);
+        
+        bones.RightArm.Index = new()
+        {
+            Bones =
+            {
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightIndexProximal).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightIndexIntermediate).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightIndexDistal).gameObject)
+            }
+        };
+        
+        bones.RightArm.Middle = new()
+        {
+            Bones =
+            {
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightMiddleProximal).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightMiddleIntermediate).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightMiddleDistal).gameObject)
+            }
+        };
+        
+        bones.RightArm.Ring = new()
+        {
+            Bones =
+            {
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightRingProximal).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightRingIntermediate).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightRingDistal).gameObject)
+            }
+        };
+        
+        bones.RightArm.Pinky = new()
+        {
+            Bones =
+            {
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLittleProximal).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLittleIntermediate).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLittleDistal).gameObject)
+            }
+        };
+        
+        bones.RightArm.Thumb = new()
+        {
+            Bones =
+            {
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightThumbProximal).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightThumbIntermediate).gameObject),
+                MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightThumbDistal).gameObject)
+            }
+        };
+    }
+
     private IMessage TranslateMeshRenderer(MeshRenderer r)
     {
         var meshFilter = r.GetComponent<MeshFilter>();
