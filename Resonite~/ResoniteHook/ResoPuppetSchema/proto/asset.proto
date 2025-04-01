@@ -14,10 +14,50 @@ message Asset {
   google.protobuf.Any asset = 3;
 }
 
+enum BlendMode {
+  Opaque = 0;
+  Cutout = 1;
+  Transparent = 2;
+  Alpha = 3;
+  Additive = 4;
+  Multiply = 5;
+  Fade = 6;
+}
+
+message ScaleOffset {
+  Vector scale = 1;
+  Vector offset = 2;
+}
+
+enum CullMode {
+  BACK = 0;
+  FRONT = 1;
+  NONE = 2;
+}
+
+/*
+enum MaterialCategory {
+  PBR = 0;
+  UNLIT = 1;
+  TOON = 2;
+}
+ */
+
 message Material {
   optional AssetID main_texture = 1;
-  optional Color main_color = 2;
-  //Texture normal_map = 2;
+  optional ScaleOffset main_texture_scale_offset = 2;
+  optional Color main_color = 3;
+  // blend mode
+  optional AssetID normal_map = 4;
+  optional ScaleOffset normal_map_scale_offset = 5;
+  optional AssetID emission_map = 6;
+  optional Color emission_color = 7;
+  optional ScaleOffset emission_map_scale_offset = 8;
+  BlendMode blend_mode = 9;
+  optional float alpha_clip = 10;
+  CullMode cull_mode = 11;
+  // TODO - should we represent alpha mask textures?
+  
   //uint32 render_queue = 3;
   
   // TODO...

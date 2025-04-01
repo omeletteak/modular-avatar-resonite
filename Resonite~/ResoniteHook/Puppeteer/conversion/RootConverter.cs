@@ -167,23 +167,22 @@ public partial class RootConverter : IDisposable
         }
     }
 
-    private async Task<f.IWorldElement?> CreateMaterial(f::Slot holder, p::Material material)
+    private f.Slot AssetSubslot(string subslotName, f.Slot root)
     {
-        await new f::ToWorld();
-        
-        // TODO: handle other material types
-        var materialComponent = holder.AttachComponent<f::PBS_Metallic>();
-        Defer(PHASE_RESOLVE_REFERENCES, () =>
+        f.Slot? slot = root.FindChild(subslotName);
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (slot == null)
         {
-            materialComponent.AlbedoTexture.Value = AssetRefID<f.IAssetProvider<f.Texture2D>>(material.MainTexture);
-        });
-        materialComponent.AlbedoColor.Value = material.MainColor?.ColorX() ?? colorX.White;
+            slot = root.AddSlot(subslotName);
+        }
 
-        return materialComponent;
+        return slot;
     }
 
-    private async Task<f.IWorldElement?> CreateTexture(f::Slot holder, p::Texture texture)
+    private async Task<f.IWorldElement?> CreateTexture(string name, p::Texture texture)
     {
+        var holder = AssetSubslot("Textures", _assetRoot).AddSlot(name);
+
         await new f::ToBackground();
         
         string extension;
@@ -221,8 +220,10 @@ public partial class RootConverter : IDisposable
         return textureComponent;
     }
     
-    private async Task<f.IWorldElement?> CreateMesh(f::Slot holder, p::mesh.Mesh mesh)
+    private async Task<f.IWorldElement?> CreateMesh(string name, p::mesh.Mesh mesh)
     {
+        var holder = AssetSubslot("Meshes", _assetRoot).AddSlot(name);
+
         await new f::ToBackground();
 
         var meshx = mesh.ToMeshX();

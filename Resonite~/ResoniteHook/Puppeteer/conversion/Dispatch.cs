@@ -24,8 +24,8 @@ public partial class RootConverter
 
     private Dictionary<string, AssetBuilder> AssetTypes = new();
     
-    private delegate Task<f.IWorldElement?> AssetBuilder(f::Slot parent, p::Asset asset);
-    private delegate Task<f.IWorldElement?> TypedAssetBuilder<M>(f::Slot parent, M asset) where M : IMessage, new();
+    private delegate Task<f.IWorldElement?> AssetBuilder(string name, p::Asset asset);
+    private delegate Task<f.IWorldElement?> TypedAssetBuilder<M>(string name, M asset) where M : IMessage, new();
 
     private void RegisterComponentType<M>(TypedComponentBuilder<M> builder)
         where M : IMessage, new()
@@ -125,9 +125,8 @@ public partial class RootConverter
             System.Console.WriteLine("Unknown asset type: " + typeName);
             return;
         }
-
-        var slot = _assetRoot.AddSlot(asset.Name);
-        var fAsset = await assetBuilder(slot, asset);
+        
+        var fAsset = await assetBuilder(asset.Name, asset);
         await new f::ToWorld();
         if (fAsset != null) _assets[asset.Id] = fAsset;
     }

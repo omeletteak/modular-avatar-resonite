@@ -34,7 +34,7 @@ namespace nadena.dev.ndmf.platform.resonite
             msg.IgnoreTransforms.AddRange(pdb.IgnoreTransforms.Where(t => t != null)
                 .Select(MapObject));
             msg.IsGrabbable = pdb.IsGrabbable;
-            msg.IgnoreSelf = pdb.IgnoreSelf;
+            //msg.IgnoreSelf = pdb.IgnoreSelf;
             msg.Colliders.AddRange(pdb.Colliders
                 .Where(c => c != null)
                 .Select(MapObject));

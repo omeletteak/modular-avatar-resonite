@@ -33,6 +33,8 @@ namespace nadena.dev.ndmf.platform.resonite
 
         private p.ExportRoot _exportRoot = new();
 
+        private List<UnityEngine.Object> _tempObjects = new();
+
         private p.AssetID MintAssetID()
         {
             return new p.AssetID() { Id = nextAssetID++ };
@@ -67,28 +69,38 @@ namespace nadena.dev.ndmf.platform.resonite
 
         internal p.ExportRoot Export(GameObject go, CommonAvatarInfo info)
         {
-            _exportRoot.Root = CreateTransforms(go.transform);
-
-            if (go.TryGetComponent<Animator>(out var animator))
+            try
             {
-                _exportRoot.Root.Components.Add(new p.Component()
+                _exportRoot.Root = CreateTransforms(go.transform);
+
+                if (go.TryGetComponent<Animator>(out var animator))
                 {
-                    Enabled = true,
-                    Id = MintObjectID(),
-                    Component_ = Any.Pack(new p.RigRoot()
-                        { })
-                });
-                _exportRoot.Root.Components.Add(new p.Component()
-                {
-                    Enabled = true,
-                    Id = MintObjectID(),
-                    Component_ = Any.Pack(TranslateAvatarDescriptor(animator, info))
-                });
+                    _exportRoot.Root.Components.Add(new p.Component()
+                    {
+                        Enabled = true,
+                        Id = MintObjectID(),
+                        Component_ = Any.Pack(new p.RigRoot()
+                            { })
+                    });
+                    _exportRoot.Root.Components.Add(new p.Component()
+                    {
+                        Enabled = true,
+                        Id = MintObjectID(),
+                        Component_ = Any.Pack(TranslateAvatarDescriptor(animator, info))
+                    });
+                }
+
+                ProcessAssets();
+
+                return _exportRoot;
             }
-
-            ProcessAssets();
-
-            return _exportRoot;
+            finally
+            {
+                foreach (var obj in _tempObjects)
+                {
+                    UnityEngine.Object.DestroyImmediate(obj);
+                }
+            }
         }
 
         private p.GameObject CreateTransforms(Transform t)
@@ -385,24 +397,129 @@ namespace nadena.dev.ndmf.platform.resonite
         private IMessage TranslateTexture2D(Texture2D tex2d)
         {
             var protoTex = new p.Texture();
-            var filePath = AssetDatabase.GetAssetPath(tex2d);
 
-            protoTex.Bytes = new() { Inline = ByteString.CopyFrom(File.ReadAllBytes(filePath)) };
+            if (AssetDatabase.IsMainAsset(tex2d))
+            {
+                var filePath = AssetDatabase.GetAssetPath(tex2d);
 
-            if (filePath.ToLowerInvariant().EndsWith(".png")) protoTex.Format = p.TextureFormat.Png;
-            else if (filePath.ToLowerInvariant().EndsWith(".jpg") || filePath.ToLowerInvariant().EndsWith(".jpeg"))
-                protoTex.Format = p.TextureFormat.Jpeg;
-            else throw new System.Exception("Unsupported texture format: " + filePath);
+                protoTex.Bytes = new() { Inline = ByteString.CopyFrom(File.ReadAllBytes(filePath)) };
 
-            return protoTex;
+                if (filePath.ToLowerInvariant().EndsWith(".png")) protoTex.Format = p.TextureFormat.Png;
+                else if (filePath.ToLowerInvariant().EndsWith(".jpg") || filePath.ToLowerInvariant().EndsWith(".jpeg"))
+                    protoTex.Format = p.TextureFormat.Jpeg;
+                else throw new System.Exception("Unsupported texture format: " + filePath);
+
+                return protoTex;
+            }
+            else
+            {
+                // Convert to PNG (blit if necessary)
+                if (!tex2d.isReadable || tex2d.format != TextureFormat.ARGB32)
+                {
+                    var tmpTex = new Texture2D(tex2d.width, tex2d.height, TextureFormat.ARGB32, false);
+                    Graphics.CopyTexture(tex2d, tmpTex);
+                    protoTex.Bytes = new() { Inline = ByteString.CopyFrom(tmpTex.EncodeToPNG()) };
+                    UnityEngine.Object.DestroyImmediate(tmpTex);
+                }
+                else
+                {
+                    protoTex.Bytes = new() { Inline = ByteString.CopyFrom(tex2d.EncodeToPNG()) };
+                }
+                protoTex.Format = p.TextureFormat.Png;
+
+                return protoTex;
+            }
         }
 
         private IMessage TranslateMaterial(Material material)
         {
             var protoMat = new p.Material();
 
-            protoMat.MainTexture = MapAsset(material.mainTexture);
+            protoMat.MainTextureScaleOffset = new()
+            {
+                Scale = material.mainTextureScale.ToRPC(),
+                Offset = material.mainTextureOffset.ToRPC()
+            };
+
+            var mainTex = material.mainTexture;
+            var alphaMask = material.GetTexture("_AlphaMask");
+            if (alphaMask != null)
+            {
+                // Bake alpha to a temporary texture
+                var width = mainTex?.width ?? alphaMask.width;
+                var height = mainTex?.height ?? alphaMask.height;
+                
+                var tempTex = new Texture2D(width, height, TextureFormat.ARGB32, false);
+                _tempObjects.Add(tempTex);
+                var tempRT = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
+                var shader = mainTex != null
+                    ? Shader.Find("Hidden/NDMF/WriteColorTex")
+                    : Shader.Find("Hidden/NDMF/FillColor");
+                var tmpMat = new Material(shader);
+                _tempObjects.Add(tmpMat);
+                if (mainTex != null)
+                {
+                    tmpMat.SetTexture("_MainTex", mainTex);
+                    tmpMat.SetTextureScale("_MainTex", material.mainTextureScale);
+                    tmpMat.SetTextureOffset("_MainTex", material.mainTextureOffset);
+                }
+                Graphics.Blit(mainTex, tempRT, tmpMat);
+
+                tmpMat.shader = Shader.Find("Hidden/NDMF/WriteAlpha");
+                tmpMat.SetTexture("_AlphaMask", alphaMask);
+                tmpMat.SetTextureScale("_AlphaMask", material.GetTextureScale("_AlphaMask"));
+                tmpMat.SetTextureOffset("_AlphaMask", material.GetTextureOffset("_AlphaMask"));
+                Graphics.Blit(alphaMask, tempRT, tmpMat);
+                
+                // Read back to a texture2d
+                var tmp = RenderTexture.active;
+                RenderTexture.active = tempRT;
+                tempTex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                tempTex.Apply();
+                RenderTexture.active = tmp;
+                
+                RenderTexture.ReleaseTemporary(tempRT);
+
+                tempTex.name = (mainTex?.name ?? alphaMask.name) + " AlphaBlend";
+                mainTex = tempTex;
+            }
+            // TODO - handle differing scale/offset for alpha mask and main texture
+            
+            protoMat.MainTexture = MapAsset(mainTex);
+
             protoMat.MainColor = material.color.ToRPC();
+            
+            protoMat.NormalMap = MapAsset(material.GetTexture("_BumpMap"));
+            protoMat.NormalMapScaleOffset = new()
+            {
+                Scale = material.GetTextureScale("_BumpMap").ToRPC(),
+                Offset = material.GetTextureOffset("_BumpMap").ToRPC()
+            };
+            
+            protoMat.EmissionMap = MapAsset(material.GetTexture("_EmissionMap"));
+            protoMat.EmissionColor = material.GetColor("_EmissionColor").ToRPC();
+            protoMat.EmissionMapScaleOffset = new()
+            {
+                Scale = material.GetTextureScale("_EmissionMap").ToRPC(),
+                Offset = material.GetTextureOffset("_EmissionMap").ToRPC()
+            };
+
+            protoMat.AlphaClip = material.GetFloat("_Cutoff");
+            
+            // use VRCFallback as a proxy for shader type (for now)
+            // TODO: handle more than just VRChat shaders
+            var tag = material.GetTag("VRCFallback", false);
+            p.BlendMode blendMode = p.BlendMode.Opaque;
+            p.CullMode cullMode = p.CullMode.Back;
+            
+            if (tag.Contains("Cutout")) blendMode = p.BlendMode.Cutout;
+            else if (tag.Contains("Transparent")) blendMode = p.BlendMode.Alpha;
+            else if (tag.Contains("Fade")) blendMode = p.BlendMode.Fade;
+            
+            if (tag.Contains("DoubleSided")) cullMode = p.CullMode.None;
+            
+            protoMat.BlendMode = blendMode;
+            protoMat.CullMode = cullMode;
 
             return protoMat;
         }
