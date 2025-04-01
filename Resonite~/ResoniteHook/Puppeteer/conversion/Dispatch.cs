@@ -10,6 +10,7 @@ namespace nadena.dev.resonity.remote.puppeteer.rpc;
 
 public partial class RootConverter
 {
+    private const int PHASE_BUILD_COLLIDERS = -1;
     private const int PHASE_RESOLVE_REFERENCES = 0;
     private const int PHASE_RIG_SETUP = 100;
     private const int PHASE_AVATAR_SETUP = 200;
@@ -17,8 +18,9 @@ public partial class RootConverter
     
     private Dictionary<string, ComponentBuilder> ComponentTypes = new();
 
-    private delegate Task<f::IComponent> ComponentBuilder(f::Slot parent, p::Component component);
+    private delegate Task<f::IComponent?> ComponentBuilder(f::Slot parent, p::Component component, p.ObjectID componentID);
     private delegate Task<f::IComponent> TypedComponentBuilder<M>(f::Slot parent, M component) where M : IMessage, new();
+    private delegate Task<f::IComponent?> TypedComponentBuilder2<M>(f::Slot parent, M component, p.ObjectID componentID) where M : IMessage, new();
 
     private Dictionary<string, AssetBuilder> AssetTypes = new();
     
@@ -29,7 +31,14 @@ public partial class RootConverter
         where M : IMessage, new()
     {
         ComponentTypes[new M().Descriptor.FullName] =
-            (obj, untyped) => builder(obj, untyped.Component_.Unpack<M>());
+            async (obj, untyped, _) => await builder(obj, untyped.Component_.Unpack<M>());
+    }
+    
+    private void RegisterComponentType<M>(TypedComponentBuilder2<M> builder)
+        where M : IMessage, new()
+    {
+        ComponentTypes[new M().Descriptor.FullName] =
+            async (obj, untyped, id) => await builder(obj, untyped.Component_.Unpack<M>(), id);
     }
     
     private void RegisterAssetType<M>(TypedAssetBuilder<M> builder)
@@ -79,7 +88,8 @@ public partial class RootConverter
         RegisterComponentType<p::MeshRenderer>(CreateMeshRenderer);
         RegisterComponentType<p::RigRoot>(SetupRig);
         RegisterComponentType<p::AvatarDescriptor>(SetupAvatar);
-        
+        RegisterComponentType<p::DynamicCollider>(ProcessDynamicCollider);
+        RegisterComponentType<p::DynamicBone>(ProcessDynamicBone);
         
         // Assets
         RegisterAssetType<p::Texture>(CreateTexture);
@@ -98,7 +108,7 @@ public partial class RootConverter
             return;
         }
         
-        var fComponent = await componentBuilder(parent, component);
+        var fComponent = await componentBuilder(parent, component, component.Id);
         if (fComponent != null)
         {
             fComponent.Enabled = component.Enabled;

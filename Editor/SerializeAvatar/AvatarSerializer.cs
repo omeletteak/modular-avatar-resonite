@@ -7,6 +7,7 @@ using System.Linq;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using nadena.dev.modular_avatar.core;
+using nadena.dev.ndmf.multiplatform.components;
 using nadena.dev.ndmf.proto.mesh;
 using nadena.dev.ndmf.proto.rpc;
 using ResoPuppetSchema;
@@ -19,7 +20,7 @@ using p = nadena.dev.ndmf.proto;
 
 namespace nadena.dev.ndmf.platform.resonite
 {
-    internal class AvatarSerializer
+    internal partial class AvatarSerializer
     {
         private ulong nextAssetID = 1;
         private ulong nextObjectID = 1;
@@ -105,7 +106,7 @@ namespace nadena.dev.ndmf.platform.resonite
 
             foreach (Component c in t.gameObject.GetComponents<Component>())
             {
-                IMessage protoComponent;
+                IMessage? protoComponent;
                 switch (c)
                 {
                     case MeshRenderer mr:
@@ -114,8 +115,17 @@ namespace nadena.dev.ndmf.platform.resonite
                     case SkinnedMeshRenderer smr:
                         protoComponent = TranslateSkinnedMeshRenderer(smr);
                         break;
+                    case PortableDynamicCollider collider:
+                        protoComponent = TranslateDynamicCollider(collider);
+                        break;
+                    case PortableDynamicBone pdb:
+                        protoComponent = TranslateDynamicBone(pdb);
+                        break;
+                        
                     default: continue;
                 }
+
+                if (protoComponent == null) continue;
 
                 p.Component wrapper = new p.Component()
                 {

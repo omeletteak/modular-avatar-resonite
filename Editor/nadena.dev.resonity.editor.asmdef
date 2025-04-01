@@ -5,7 +5,8 @@
         "nadena.dev.ndmf",
         "nadena.dev.ndmf.runtime",
         "nadena.dev.modular-avatar.core",
-        "nadena.dev.modular-avatar.core.editor"
+        "nadena.dev.modular-avatar.core.editor",
+        "nadena.dev.ndmf.multiplatform.runtime"
     ],
     "includePlatforms": [
         "Editor"

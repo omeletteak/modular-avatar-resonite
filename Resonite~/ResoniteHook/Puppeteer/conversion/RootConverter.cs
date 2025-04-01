@@ -114,6 +114,9 @@ public partial class RootConverter : IDisposable
         //_root.AttachComponent<f.DestroyRoot>();
         _root.AttachComponent<SimpleAvatarProtection>();
         _root.AttachComponent<f.ObjectRoot>();
+        var dynamicVariableSpace = _root.AttachComponent<f.DynamicVariableSpace>();
+        dynamicVariableSpace.SpaceName.Value = "NDMF";
+        dynamicVariableSpace.OnlyDirectBinding.Value = true;
         
         SavedGraph savedGraph = _root.SaveObject(f.DependencyHandling.CollectAssets);
         Record record = RecordHelper.CreateForObject<Record>(_root.Name, "", null);

@@ -8,7 +8,7 @@ using UnityEngine;
 namespace nadena.dev.ndmf.platform.resonite
 {
     [NDMFPlatformProvider]
-    public class ResonitePlatform : INDMFPlatformProvider
+    internal class ResonitePlatform : INDMFPlatformProvider
     {
         internal static ResoPuppeteer.ResoPuppeteerClient _rpcClient { get; } = new Connector().Client;
 
