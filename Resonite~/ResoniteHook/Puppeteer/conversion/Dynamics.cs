@@ -154,22 +154,22 @@ public partial class RootConverter
         {
             if (templateRoot != null)
             {
-                var variable = templateRoot.AttachComponent<f.DynamicValueVariable<T>>();
+                var templateFieldBinding = templateRoot.AttachComponent<f.DynamicField<T>>();
                 //variable.VariableName.Value = variableName;
-                StringConcatNode(templateBindings!, templateRoot.NameField, field.Name, variable.VariableName);
-                variable.Value.Value = field.Value;
-                
+                StringConcatNode(templateBindings!, templateRoot.NameField, field.Name, templateFieldBinding.VariableName);
+
                 var templateField = templateChain!.TryGetField<T>(field.Name) ?? throw new Exception("Field not found");
-                variable.Value.DriveFrom(templateField);
+                templateFieldBinding.OverrideOnLink.Value = true;
+                templateFieldBinding.TargetField.Value = templateField.ReferenceID;
             }
 
             var fieldBindingNode = bindingInternalsNode.AddSlot(field.Name);
             
-            var driver = fieldBindingNode.AttachComponent<f.DynamicValueVariableDriver<T>>();
-            driver.DefaultValue.Value = field.Value;
+            var driver = fieldBindingNode.AttachComponent<f.DynamicField<T>>();
+            driver.TargetField.Value = field.ReferenceID;
+            driver.OverrideOnLink.Value = false;
             //driver.VariableName.Value = variableName;
             StringConcatNode(fieldBindingNode, templateNameField, field.Name, driver.VariableName);
-            driver.Target.Value = field.ReferenceID;
         }
 
         void StringConcatNode(Slot internalsNode, IField<string> templateName, string fieldName, IField<string> target)
