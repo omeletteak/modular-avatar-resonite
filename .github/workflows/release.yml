@@ -51,8 +51,8 @@ jobs:
       - uses: actions/create-github-app-token@v1
         id: app-token
         with:
-          app-id: ${{ vars.MA_RESONITE_RELEASER_APP_ID }}
-          private-key: ${{ secrets.NDMF_RELEASER_PRIVATE_KEY }}
+          app-id: ${{ vars.RELEASER_APP_ID }}
+          private-key: ${{ secrets.RELEASER_PRIVATE_KEY }}
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -169,7 +169,7 @@ jobs:
           # Write commit ID to github step output
           echo "commit_id=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
   dotnet-build:
-    uses: ${{ env.REPO }}/.github/workflows/dotnet.yml@main
+    uses: ./.github/workflows/dotnet.yml@main
     needs: prepare-release
     with:
       ref: ${{ needs.prepare-release.outputs.commit_id }}
