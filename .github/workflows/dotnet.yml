@@ -115,7 +115,9 @@ jobs:
   license:
     uses: bdunderscore/resonity/.github/workflows/license-file.yml@main
   package:
-    needs: build
+    needs:
+      - build
+      - license
     runs-on: ubuntu-latest
     steps:
       - name: Fetch dotnet build artifacts
