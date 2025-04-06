@@ -175,7 +175,7 @@ jobs:
       ref: ${{ needs.prepare-release.outputs.commit_id }}
 
   push-release:
-    needs: prepare-release
+    needs: [prepare-release, dotnet-build]
     runs-on: ubuntu-latest
     steps:
       # https://github.com/orgs/community/discussions/13836#discussioncomment-8535364
