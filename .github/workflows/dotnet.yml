@@ -1,13 +1,15 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: .NET
+name: Build .NET artifacts
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+  workflow_call:
 
 env:
   RPC_SERVER_SRC: Resonite~/ResoniteHook
@@ -16,7 +18,6 @@ env:
 
 jobs:
   build:
-
     runs-on: windows-latest
 
     steps:
@@ -85,6 +86,18 @@ jobs:
       run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet build --no-restore --verbosity normal
     - name: Test
       run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet test --no-build --verbosity normal
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: dotnet-build-artifacts
+        path:
+          .
+          ! .git
+          ! .github
+          ! DevTools~
+          ! Resonite~
+        
 
     - name: Save steamcmd cache
       if: steps.install-resonite.outcome == 'success'
@@ -99,4 +112,27 @@ jobs:
       with:
         key: ${{ steps.cache-resonite.outputs.cache-primary-key }}
         path: "${{ env.RESONITE_PATH }}"
-    
+  license:
+    uses: bdunderscore/resonity/.github/workflows/license-file.yml@main
+  package:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch dotnet build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dotnet-build-artifacts
+      - name: Fetch license file artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dotnet-build-artifacts
+      - run: ls -lR
+      - name: Package .zip file
+        run: |
+          apt-get install -y zip
+            zip -r resonite-hook.zip . -x resonite-hook.zip
+      - name: Upload final .zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: resonite-hook.zip
+          path: resonite-hook.zip
