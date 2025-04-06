@@ -12,7 +12,9 @@ using nadena.dev.ndmf.proto.mesh;
 using nadena.dev.ndmf.proto.rpc;
 using ResoPuppetSchema;
 using UnityEditor;
+using UnityEditor.Graphs;
 using UnityEngine;
+using UnityEngine.UI;
 using VRC.SDK3.Avatars.Components;
 using BoneWeight = nadena.dev.ndmf.proto.mesh.BoneWeight;
 using Mesh = UnityEngine.Mesh;
@@ -127,7 +129,7 @@ namespace nadena.dev.ndmf.platform.resonite
                     case SkinnedMeshRenderer smr:
                         protoComponent = TranslateSkinnedMeshRenderer(smr);
                         break;
-                    case PortableDynamicCollider collider:
+                    case PortableDynamicBoneCollider collider:
                         protoComponent = TranslateDynamicCollider(collider);
                         break;
                     case PortableDynamicBone pdb:
@@ -417,7 +419,21 @@ namespace nadena.dev.ndmf.platform.resonite
                 if (!tex2d.isReadable || tex2d.format != TextureFormat.ARGB32)
                 {
                     var tmpTex = new Texture2D(tex2d.width, tex2d.height, TextureFormat.ARGB32, false);
-                    Graphics.CopyTexture(tex2d, tmpTex);
+                    // We can't use copytexture as the formats may differ; bounce through a RenderTexture
+                    var tmpRT = RenderTexture.GetTemporary(tex2d.width, tex2d.height, 0, RenderTextureFormat.ARGB32);
+                    var priorRT = RenderTexture.active;
+                    try
+                    {
+                        Graphics.Blit(tex2d, tmpRT);
+                        RenderTexture.active = tmpRT;
+                        
+                        tmpTex.ReadPixels(new Rect(0, 0, tex2d.width, tex2d.height), 0, 0);
+                    }
+                    finally
+                    {
+                        RenderTexture.active = priorRT;
+                    }
+                    
                     protoTex.Bytes = new() { Inline = ByteString.CopyFrom(tmpTex.EncodeToPNG()) };
                     UnityEngine.Object.DestroyImmediate(tmpTex);
                 }

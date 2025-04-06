@@ -173,6 +173,14 @@ public partial class RootConverter
         }
 
         var analyzer = _root.GetComponentInChildren<f.VisemeAnalyzer>();
+        if (analyzer == null)
+        {
+            // Avatar creator won't create the analyzer if it can't detect visemes. Create it ourself
+            var head = _root.FindChild("Head Proxy");
+            analyzer = head.AttachComponent<f.VisemeAnalyzer>();
+            head.AttachComponent<AvatarVoiceSourceAssigner>().TargetReference.Target = analyzer.Source;
+        }
+        
         var driver = targetMesh.Slot.AttachComponent<f.DirectVisemeDriver>();
         driver.Source.Target = analyzer;
 

@@ -175,6 +175,7 @@ public partial class RootConverter
         shadowRamp.URL.Value = new Uri("resdb:///213a4363379a81e99478e36f0aec87d65e68e3c3f42ec83b9ac3aa38bcd931ba.webp");
 
         xs.ShadowRamp.Value = shadowRamp.ReferenceID;
+        xs.ShadowSharpness.Value = 0;
 
         return xs;
     }

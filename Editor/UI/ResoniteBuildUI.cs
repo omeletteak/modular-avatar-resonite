@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using nadena.dev.ndmf.preview;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -53,9 +54,12 @@ namespace nadena.dev.ndmf.platform.resonite
 
                 var buildContext = AvatarProcessor.ProcessAvatar(clone, ResonitePlatform.Instance);
 
+                // Find a temp path under the project root
+                var tempPath = System.IO.Path.Combine(Application.temporaryCachePath, "tmp.resonitepackage");
+                
                 var asyncCall = ResonitePlatform._rpcClient.ConvertObjectAsync(new()
                 {
-                    Path = "d:\\test.resonitepackage",
+                    Path = tempPath,
                     Root = new AvatarSerializer().Export(clone, buildContext.GetState<ResoniteBuildState>().cai)
                 });
 
@@ -69,7 +73,12 @@ namespace nadena.dev.ndmf.platform.resonite
                     }
                     else
                     {
-                        Debug.Log("Resonite package built successfully");
+                        Debug.Log("Resonite package built successfully: " + tempPath);
+                        // Put the path into the clipboard
+                        NDMFSyncContext.RunOnMainThread(path =>
+                        {
+                            EditorGUIUtility.systemCopyBuffer = (string) path;    
+                        }, tempPath);
                     }
 
                     Progress.Remove(progressId);

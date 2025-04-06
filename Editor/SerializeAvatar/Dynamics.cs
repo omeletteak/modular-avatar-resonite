@@ -26,31 +26,31 @@ namespace nadena.dev.ndmf.platform.resonite
         {
             var msg = new p.DynamicBone();
 
-            var root = pdb.Root != null ? pdb.Root.gameObject : pdb.gameObject;
+            var root = pdb.Root.Value != null ? pdb.Root.Value.gameObject : pdb.gameObject;
 
             msg.RootTransform = MapObject(root);
             msg.TemplateName = pdb.TemplateName;
             msg.BaseRadius = pdb.BaseRadius;
-            msg.IgnoreTransforms.AddRange(pdb.IgnoreTransforms.Where(t => t != null)
+            msg.IgnoreTransforms.AddRange(pdb.IgnoreTransforms.Value.Where(t => t != null)
                 .Select(MapObject));
             msg.IsGrabbable = pdb.IsGrabbable;
             //msg.IgnoreSelf = pdb.IgnoreSelf;
-            msg.Colliders.AddRange(pdb.Colliders
+            msg.Colliders.AddRange(pdb.Colliders.Value
                 .Where(c => c != null)
                 .Select(MapObject));
 
             return msg;
         }
 
-        private IMessage? TranslateDynamicCollider(PortableDynamicCollider collider)
+        private IMessage? TranslateDynamicCollider(PortableDynamicBoneCollider boneCollider)
         {
             var msg = new p.DynamicCollider();
             
-            var root = collider.Root != null ? collider.Root.gameObject : collider.gameObject;
+            var root = boneCollider.Root != null ? boneCollider.Root.gameObject : boneCollider.gameObject;
             msg.TargetTransform = MapObject(root);
 
             p.ColliderType ty;
-            switch (collider.ColliderType)
+            switch (boneCollider.ColliderType)
             {
                 case PortableDynamicColliderType.Sphere: ty = p.ColliderType.Sphere; break;
                 case PortableDynamicColliderType.Capsule: ty = p.ColliderType.Capsule; break;
@@ -61,10 +61,10 @@ namespace nadena.dev.ndmf.platform.resonite
             }
 
             msg.Type = ty;
-            msg.Radius = collider.Radius;
-            msg.Height = collider.Height;
-            msg.PositionOffset = collider.PositionOffset.ToRPC();
-            msg.RotationOffset = collider.RotationOffset.ToRPC();
+            msg.Radius = boneCollider.Radius;
+            msg.Height = boneCollider.Height;
+            msg.PositionOffset = boneCollider.PositionOffset.ToRPC();
+            msg.RotationOffset = boneCollider.RotationOffset.ToRPC();
 
             return msg;
         }
