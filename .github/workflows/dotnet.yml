@@ -146,8 +146,8 @@ jobs:
       - run: ls -lR
       - name: Package .zip file
         run: |
-          apt-get install -y zip
-            zip -r resonite-hook.zip . -x resonite-hook.zip
+          sudo apt-get install -y zip
+          zip -r resonite-hook.zip . -x resonite-hook.zip
       - name: Upload final .zip
         uses: actions/upload-artifact@v4
         with:
