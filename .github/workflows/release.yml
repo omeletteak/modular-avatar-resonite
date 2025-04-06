@@ -165,9 +165,10 @@ jobs:
       - name: Commit and tag version update
         run: |
           git commit -am "Release ${{ github.event.inputs.version }}"
-          git push origin HEAD:release-staging
+          git push origin HEAD:release-staging-${{ github.event.inputs.version }} --force
           # Write commit ID to github step output
           echo "commit_id=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+  
   dotnet-build:
     uses: ./.github/workflows/dotnet.yml
     needs: prepare-release
@@ -202,6 +203,10 @@ jobs:
           git push origin $BRANCH_NAME && git push origin ${{ github.event.inputs.version }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Clean staging branch
+        run: |
+          git push origin +:release-staging-${{ github.event.inputs.version }}
 
       - name: Fetch release zip
         uses: actions/download-artifact@v4
