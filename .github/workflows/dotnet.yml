@@ -93,7 +93,7 @@ jobs:
       run: |
         $allowedFiles = @("Google.Protobuf.dll", "Grpc.AspNetCore.Server.dll", "Grpc.Core.Api.sll", "Grpc.Net.Common.dll", "GrpcDotNetNamedPipes.dll", "JetBrains.Annotations.dll")
         Get-ChildItem -Path "${{ env.RESONITE_ASSEMBLY_PATH }}" | ForEach-Object {
-          if ($allowedFiles -notcontains $_.Name -and Test-Path "${{ env.RPC_SERVER_SRC }}/Puppeteer/bin/Debug/net9.0/$($_.Name)") {
+          if ($allowedFiles -notcontains $_.Name -and (Test-Path "${{ env.RPC_SERVER_SRC }}/Puppeteer/bin/Debug/net9.0/$($_.Name)")) {
             Write-Error "Files from ${{ env.RESONITE_PATH }} found in ${{ env.RPC_SERVER_SRC }}/Puppeteer/bin/Debug/net9.0: $($_.Name)"
             exit 1
           }
