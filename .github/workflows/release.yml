@@ -169,7 +169,7 @@ jobs:
           # Write commit ID to github step output
           echo "commit_id=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
   dotnet-build:
-    uses: ./.github/workflows/dotnet.yml@main
+    uses: ./.github/workflows/dotnet.yml
     needs: prepare-release
     with:
       ref: ${{ needs.prepare-release.outputs.commit_id }}

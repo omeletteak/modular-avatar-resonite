@@ -138,7 +138,7 @@ jobs:
         key: ${{ steps.cache-resonite.outputs.cache-primary-key }}
         path: "${{ env.RESONITE_PATH }}"
   license:
-    uses: ./.github/workflows/license-file.yml@main
+    uses: ./.github/workflows/license-file.yml
   package:
     needs:
       - build
