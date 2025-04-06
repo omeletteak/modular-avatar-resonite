@@ -21,6 +21,7 @@ env:
   RESONITE_PATH: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite"
   RESONITE_ASSEMBLY_PATH: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite\\Resonite_Data\\Managed\\"
   CACHE_SALT: -v2
+  REPO: bdunderscore/modular-avatar-resonite
 
 jobs:
   build:
@@ -137,7 +138,7 @@ jobs:
         key: ${{ steps.cache-resonite.outputs.cache-primary-key }}
         path: "${{ env.RESONITE_PATH }}"
   license:
-    uses: bdunderscore/resonity/.github/workflows/license-file.yml@main
+    uses: ${{ env.REPO }}/.github/workflows/license-file.yml@main
   package:
     needs:
       - build

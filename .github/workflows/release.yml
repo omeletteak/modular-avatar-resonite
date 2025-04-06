@@ -26,6 +26,7 @@ on:
 env:
   PKG_NAME: nadena.dev.ndmf
   RELEASE_TYPE: ${{ github.event.inputs.release_kind }}
+  REPO: bdunderscore/modular-avatar-resonite
 
 concurrency:
   group: publish
@@ -168,7 +169,7 @@ jobs:
           # Write commit ID to github step output
           echo "commit_id=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
   dotnet-build:
-    uses: bdunderscore/resonity/.github/workflows/dotnet.yml@main
+    uses: ${{ env.REPO }}/.github/workflows/dotnet.yml@main
     needs: prepare-release
     with:
       ref: ${{ needs.prepare-release.outputs.commit_id }}
