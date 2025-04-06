@@ -39,7 +39,7 @@ jobs:
           cd c:\
           Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile c:\steamcmd.zip
           Expand-Archive c:\steamcmd.zip -Force
-          New-Item -ItemType Directory -Path "${{ env.RESONITE_PATH }}"
+          New-Item -ItemType Directory -Path "${{ env.RESONITE_PATH }}" -Force
           dir c:\steamcmd
 
       - name: Update steamcmd
