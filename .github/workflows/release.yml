@@ -27,6 +27,7 @@ env:
   PKG_NAME: nadena.dev.ndmf
   RELEASE_TYPE: ${{ github.event.inputs.release_kind }}
   REPO: bdunderscore/modular-avatar-resonite
+  zipFile: nadena.dev.modular-avatar.resonite-${{ github.event.inputs.version }}.zip
 
 concurrency:
   group: publish
