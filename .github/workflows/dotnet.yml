@@ -10,6 +10,11 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
   workflow_call:
+    inputs:
+      ref:
+        description: 'commit to build'
+        type: string
+        required: false
 
 env:
   RPC_SERVER_SRC: Resonite~/ResoniteHook
@@ -23,6 +28,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: ${{ inputs.ref || github.ref }}
+        lfs: true
 
     - uses: nuget/setup-nuget@v2
       with:
@@ -142,7 +151,7 @@ jobs:
       - name: Fetch license file artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dotnet-build-artifacts
+          name: COPYING.md
       - run: ls -lR
       - name: Package .zip file
         run: |
