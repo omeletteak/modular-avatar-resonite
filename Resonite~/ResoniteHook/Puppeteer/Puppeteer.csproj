@@ -48,16 +48,20 @@
             <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed\FrooxEngine.Weaver.dll</HintPath>
         </Reference>
         <Reference Include="ProtoFlux.Core">
-          <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed\ProtoFlux.Core.dll</HintPath>
+            <PrivateAssets>all</PrivateAssets><Private>false</Private>
+            <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed\ProtoFlux.Core.dll</HintPath>
         </Reference>
         <Reference Include="ProtoFlux.Nodes.Core">
-          <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed\ProtoFlux.Nodes.Core.dll</HintPath>
+            <PrivateAssets>all</PrivateAssets><Private>false</Private>
+            <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed\ProtoFlux.Nodes.Core.dll</HintPath>
         </Reference>
         <Reference Include="ProtoFlux.Nodes.FrooxEngine">
-          <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed\ProtoFlux.Nodes.FrooxEngine.dll</HintPath>
+            <PrivateAssets>all</PrivateAssets><Private>false</Private>
+            <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed\ProtoFlux.Nodes.FrooxEngine.dll</HintPath>
         </Reference>
         <Reference Include="ProtoFluxBindings">
-          <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed\ProtoFluxBindings.dll</HintPath>
+            <PrivateAssets>all</PrivateAssets><Private>false</Private>
+            <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Resonite\Resonite_Data\Managed\ProtoFluxBindings.dll</HintPath>
         </Reference>
         <Reference Include="SkyFrost.Base">
             <PrivateAssets>all</PrivateAssets><Private>false</Private>

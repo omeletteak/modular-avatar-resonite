@@ -14,6 +14,7 @@ on:
 env:
   RPC_SERVER_SRC: Resonite~/ResoniteHook
   RESONITE_PATH: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite"
+  RESONITE_ASSEMBLY_PATH: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite\\Resonite_Data\\Managed\\"
   CACHE_SALT: -v2
 
 jobs:
@@ -86,6 +87,17 @@ jobs:
       run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet build --no-restore --verbosity normal
     - name: Test
       run: cd "${{ env.RPC_SERVER_SRC }}"; dotnet test --no-build --verbosity normal
+
+
+    - name: Assert that no resonite source files were copied into the output artifact
+      run: |
+        if (Get-ChildItem -Path "${{ env.RESONITE_ASSEMBLY_PATH }}" | ForEach-Object { Test-Path "${{ env.RPC_SERVER_SRC }}/Puppeteer/bin/Debug/net9.0/$($_.Name)" }) {
+          Write-Error "Files from ${{ env.RESONITE_PATH }} found in ${{ env.RPC_SERVER_SRC }}/Puppeteer/bin/Debug/net9.0"
+          exit 1
+        }
+        
+    - name: Copy into final package location
+      run: .\DevTools~\SyncToUnity.ps1
       
     - name: Upload artifact
       uses: actions/upload-artifact@v4
