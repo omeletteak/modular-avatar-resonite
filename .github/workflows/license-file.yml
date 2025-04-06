@@ -4,10 +4,8 @@
 name: Generate license notices file
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_call:
+  workflow_dispatch:
 
 env:
   RPC_SERVER_SRC: Resonite~/ResoniteHook
@@ -32,6 +30,11 @@ jobs:
         
       - name: Generate license report
         run: |
-          cd Resonite~/ResoniteHook
-          build-license -i ResoniteHook.sln -o license-report.txt
-          cat license-report.txt
+          (cd Resonite~/ResoniteHook; build-license -i ResoniteHook.sln -o license-report.txt)
+          cat Resonite~/ResoniteHook/license-report.txt >> COPYING.md
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        name: COPYING.md
+        path: COPYING.md
+        retention-days: 7
