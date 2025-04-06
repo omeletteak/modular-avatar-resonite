@@ -47,14 +47,13 @@ jobs:
 
       - name: Cache steamcmd
         id: cache-steamcmd
-        if: steps.cache-resonite.outputs.cache-hit != 'true'
         uses: actions/cache/restore@v4
         with:
           path: c:\steamcmd
           key: steamcmd
 
       - name: Setup steamcmd
-        if: steps.cache-steamcmd.outputs.cache-hit != 'true' && steps.cache-resonite.outputs.cache-hit != 'true'
+        if: steps.cache-steamcmd.outputs.cache-hit != 'true'
         run: |
           cd c:\
           Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile c:\steamcmd.zip
@@ -63,7 +62,6 @@ jobs:
           dir c:\steamcmd
 
       - name: Update steamcmd
-        if: steps.cache-resonite.outputs.cache-hit != 'true'
         run: |
           $ErrorAction = "Ignore"
           # run updater first
