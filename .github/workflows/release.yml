@@ -179,6 +179,11 @@ jobs:
     needs: [prepare-release, dotnet-build]
     runs-on: ubuntu-latest
     steps:
+      - name: Set git user and email
+        id: git-config
+        run: |
+          git config --global user.name "nadena.dev release bot"
+          git config --global user.email "ci@nadena.dev"
       # https://github.com/orgs/community/discussions/13836#discussioncomment-8535364
       - uses: actions/create-github-app-token@v1
         id: app-token
