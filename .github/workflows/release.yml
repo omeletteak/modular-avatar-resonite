@@ -200,7 +200,7 @@ jobs:
         
       - name: Create tag
         run: |
-          git tag -a staging-${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
+          git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
       - name: Publish tag
         if: ${{ github.event.inputs.publish == 'true' }}
         run: |
