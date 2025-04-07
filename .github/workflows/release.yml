@@ -221,7 +221,9 @@ jobs:
       - name: unzip modified package.json
         run: |
           sudo apt install unzip
+          rm package.json -f
           unzip -o resonite-hook.zip package.json
+          ls -lR
 
       - name: Move zipfile
         run: |
