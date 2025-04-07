@@ -218,6 +218,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: resonite-hook.zip
+      - name: unzip modified package.json
+        run: |
+          sudo apt install unzip
+          unzip -o resonite-hook.zip package.json
 
       - name: Move zipfile
         run: |
