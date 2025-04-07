@@ -207,7 +207,7 @@ jobs:
       - name: Publish tag
         if: ${{ github.event.inputs.publish == 'true' }}
         run: |
-          BRANCH_NAME=$(git branch --show-current)
+          BRANCH_NAME=${{ github.event.ref_name }}
           git push origin ${{ needs.prepare-release.outputs.commit_id }}:$BRANCH_NAME && git push origin ${{ github.event.inputs.version }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
