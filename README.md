@@ -3,8 +3,20 @@
 This package provides support for building NDMF/Modular Avatar avatars for resonite, including
 automatic conversion of VRC physbones.
 
+Currently supported:
+* Conversion of VRCSDK viewpoint, viseme, physbone data
+* Conversion of skinned and unskinned meshes
+* Conversion of textures (including dynamically generated textures)
+* Conversion of materials (including dynamic materials)
+  * All materials are currently converted to XiexeToonShader
+
+Planned:
+* Support for standalone projects (without VRCSDK avatar descriptor)
+* Support for attaching resonitepackages to your avatar at build time
+* Some kind of support for gestures
+
 To get started:
-* Install ALCOM.
+* Install [ALCOM](https://vrc-get.anatawa12.com/en/alcom/). Please do not use the VCC to install this package.
 * Add https://vpm.nadena.dev/vpm-reso.json to your VPM sources.
 * Install the `Modular Avatar - Resonite Support` package
 * Enable NDMF_EXPERIMENTAL define:
@@ -25,7 +37,7 @@ To get started:
 VRCの揺れもの設定の自動変換などにも対応しています。
 
 セットアップ手順：
-* ALCOMをインストールします。（VCCを使用しないでください）
+* [ALCOM](https://vrc-get.anatawa12.com/ja/alcom/)をインストールします。（VCCを使用しないでください）
 * https://vpm.nadena.dev/vpm-reso.json をVPMのソースに追加します。
 * `Modular Avatar - Resonite Support`パッケージをインストールします。
 * NDMF_EXPERIMENTAL を有効にします：
