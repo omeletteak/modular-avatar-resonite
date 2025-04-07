@@ -1,0 +1,156 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "Puppeteer/1.0.0": {
+        "dependencies": {
+          "Google.Protobuf": "3.30.1",
+          "Google.Protobuf.Tools": "3.30.1",
+          "Grpc.AspNetCore.Server": "2.70.0",
+          "Grpc.Tools": "2.71.0",
+          "GrpcDotNetNamedPipes": "3.1.0",
+          "JetBrains.Annotations": "2025.1.0-eap1"
+        },
+        "runtime": {
+          "Puppeteer.dll": {}
+        }
+      },
+      "Google.Protobuf/3.30.1": {
+        "runtime": {
+          "lib/net5.0/Google.Protobuf.dll": {
+            "assemblyVersion": "3.30.1.0",
+            "fileVersion": "3.30.1.0"
+          }
+        }
+      },
+      "Google.Protobuf.Tools/3.30.1": {},
+      "Grpc.AspNetCore.Server/2.70.0": {
+        "dependencies": {
+          "Grpc.Net.Common": "2.70.0"
+        },
+        "runtime": {
+          "lib/net9.0/Grpc.AspNetCore.Server.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.70.0.0"
+          }
+        }
+      },
+      "Grpc.Core.Api/2.70.0": {
+        "runtime": {
+          "lib/netstandard2.1/Grpc.Core.Api.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.70.0.0"
+          }
+        }
+      },
+      "Grpc.Net.Common/2.70.0": {
+        "dependencies": {
+          "Grpc.Core.Api": "2.70.0"
+        },
+        "runtime": {
+          "lib/net8.0/Grpc.Net.Common.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.70.0.0"
+          }
+        }
+      },
+      "Grpc.Tools/2.71.0": {},
+      "GrpcDotNetNamedPipes/3.1.0": {
+        "dependencies": {
+          "Google.Protobuf": "3.30.1",
+          "Grpc.Core.Api": "2.70.0",
+          "System.Memory": "4.6.0"
+        },
+        "runtime": {
+          "lib/net8.0/GrpcDotNetNamedPipes.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "JetBrains.Annotations/2025.1.0-eap1": {
+        "runtime": {
+          "lib/netstandard2.0/JetBrains.Annotations.dll": {
+            "assemblyVersion": "4242.42.42.42",
+            "fileVersion": "2025.1.0.0"
+          }
+        }
+      },
+      "System.Memory/4.6.0": {}
+    }
+  },
+  "libraries": {
+    "Puppeteer/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Google.Protobuf/3.30.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-HeWXDQBabQn/sCGicbeLJ0HMunknfC4FdLrOQOsaMJHcpqx3HVIpyyJqTrqJlWnza870twhOb+rBcaTiC/TlNA==",
+      "path": "google.protobuf/3.30.1",
+      "hashPath": "google.protobuf.3.30.1.nupkg.sha512"
+    },
+    "Google.Protobuf.Tools/3.30.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-AYALXfAgtmUcbX1AzRitojVBnX2HNhhp0YKpAsBeHTcMR3qH5osEGKwY5GrKSPj/icQNnlYit9lrgLM0h+mHQA==",
+      "path": "google.protobuf.tools/3.30.1",
+      "hashPath": "google.protobuf.tools.3.30.1.nupkg.sha512"
+    },
+    "Grpc.AspNetCore.Server/2.70.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-9d6JuMLSxwOX4zERV7HBwq1XL8DD48a6FSoxD5dDXrCz/o0HqMXE2+lRcXHckOlz1JCesznW8XMMJdsU1FfY7w==",
+      "path": "grpc.aspnetcore.server/2.70.0",
+      "hashPath": "grpc.aspnetcore.server.2.70.0.nupkg.sha512"
+    },
+    "Grpc.Core.Api/2.70.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-66UotvWcSIq41oiQhLWcQACyKPM4umxXNiht5DQTLZJfNwEswWOcS7Z0xIEHyNIBE7ZpjotH22bEjTkvhPxmVw==",
+      "path": "grpc.core.api/2.70.0",
+      "hashPath": "grpc.core.api.2.70.0.nupkg.sha512"
+    },
+    "Grpc.Net.Common/2.70.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-rBdEUMyCwa+iB8mqC6JKyPbj3SBHHkReJj/yy/XKJI63GcG6w9DJMMGTVcYHqq4Ci2W4m0HT4jt2pFfFscar8g==",
+      "path": "grpc.net.common/2.70.0",
+      "hashPath": "grpc.net.common.2.70.0.nupkg.sha512"
+    },
+    "Grpc.Tools/2.71.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-r8zHZm7kHdMrtujnkcuQ0BNDH2969at/8Va1ZzQgVblaQzR7tm8JlA3G+5Z5IFbvvf9PcAr1/VcoSR+g7j4Nyw==",
+      "path": "grpc.tools/2.71.0",
+      "hashPath": "grpc.tools.2.71.0.nupkg.sha512"
+    },
+    "GrpcDotNetNamedPipes/3.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-IEbpody7yYtL+oTNGRJspbK+Xne2fWzhiAOmJxJ8zoS3knFv0jDxv0WgJxO2cOCpoItn1cv4X4dloxSbFPB3eA==",
+      "path": "grpcdotnetnamedpipes/3.1.0",
+      "hashPath": "grpcdotnetnamedpipes.3.1.0.nupkg.sha512"
+    },
+    "JetBrains.Annotations/2025.1.0-eap1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-5ApJk9xbFOdbz7L8W9LAA63DIMbqC1p81KOYLeLu+d3Pj9yC83aZBQgHce/LCCu9j/mzVZxEUl70rDoUEGs7Gg==",
+      "path": "jetbrains.annotations/2025.1.0-eap1",
+      "hashPath": "jetbrains.annotations.2025.1.0-eap1.nupkg.sha512"
+    },
+    "System.Memory/4.6.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-OEkbBQoklHngJ8UD8ez2AERSk2g+/qpAaSWWCBFbpH727HxDq5ydVkuncBaKcKfwRqXGWx64dS6G1SUScMsitg==",
+      "path": "system.memory/4.6.0",
+      "hashPath": "system.memory.4.6.0.nupkg.sha512"
+    }
+  }
+}

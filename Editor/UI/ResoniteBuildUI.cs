@@ -7,10 +7,13 @@ namespace nadena.dev.ndmf.platform.resonite
 {
     internal class ResoniteBuildUI : BuildUIElement
     {
-        const string ResourcesRoot = "Packages/nadena.dev.resonity/Editor/UI/Resources/"; 
+        const string ResourcesRoot = "Packages/nadena.dev.modular-avatar.resonite/Editor/UI/Resources/"; 
         private UnityEngine.GameObject _avatarRoot;
-        private Button _buildButton;
+        private Button _buildButton, _copyPathButton, _saveAsButton;
 
+        private Label _buildStateLabel;
+        private VisualElement _postBuildButtonContainer, _buildStateContainer;
+        
         public override UnityEngine.GameObject AvatarRoot
         {
             get => _avatarRoot;
@@ -34,6 +37,29 @@ namespace nadena.dev.ndmf.platform.resonite
                 AssetDatabase.LoadAssetAtPath<StyleSheet>(
                     ResourcesRoot + "ResoniteBuildUI.uss");
             styleSheets.Add(styleSheet);
+
+            _buildStateContainer = rootFromUXML.Q<VisualElement>("build-state-container");
+            _postBuildButtonContainer = rootFromUXML.Q<VisualElement>("build-hbox");
+            _buildStateLabel = rootFromUXML.Q<Label>("build-state-label");
+            _copyPathButton = rootFromUXML.Q<Button>("copy-path");
+            _saveAsButton = rootFromUXML.Q<Button>("save-as");
+            
+            _copyPathButton.clicked += () =>
+            {
+                if (BuildController.Instance.LastTempPath != null)
+                {
+                    EditorGUIUtility.systemCopyBuffer = BuildController.Instance.LastTempPath;
+                }
+            };
+            
+            _saveAsButton.clicked += () =>
+            {
+                var path = EditorUtility.SaveFilePanel("Save resonite package", "", BuildController.Instance.LastAvatarName + ".resonitepackage", "resonitepackage");
+                if (string.IsNullOrEmpty(path)) return;
+                
+                // Copy temp path to this path
+                System.IO.File.Copy(BuildController.Instance.LastTempPath, path, true);
+            };
             
             _buildButton = rootFromUXML.Q<Button>("build");
             _buildButton.clickable.clicked += () =>
@@ -41,12 +67,35 @@ namespace nadena.dev.ndmf.platform.resonite
                 BuildAvatar();
             };
 
-            _buildButton.SetEnabled(_avatarRoot != null);
+            this.RegisterCallback<AttachToPanelEvent>(evt =>
+            {
+                _buildStateContainer.style.display = DisplayStyle.None;
+                BuildController.Instance.OnStateUpdate += UpdateDisplayState;
+                UpdateDisplayState();
+            });
+            
+            this.RegisterCallback<DetachFromPanelEvent>(evt =>
+            {
+                BuildController.Instance.OnStateUpdate -= UpdateDisplayState;
+            });
+
+            UpdateDisplayState();
+        }
+
+        private void UpdateDisplayState()
+        {
+            _postBuildButtonContainer.SetEnabled(!BuildController.Instance.IsBuilding);
+            _buildButton.SetEnabled(!BuildController.Instance.IsBuilding);
+            _buildStateLabel.text = BuildController.Instance.State;
         }
 
         private void BuildAvatar()
         {
+            // Start the server in the background
+            var client = RPCClientController.GetClient();
+            
             var clone = GameObject.Instantiate(_avatarRoot);
+            clone.name = clone.name.Substring(0, clone.name.Length - "(clone)".Length);
             try
             {
                 using var scope = new AmbientPlatform.Scope(ResonitePlatform.Instance);
@@ -54,34 +103,16 @@ namespace nadena.dev.ndmf.platform.resonite
 
                 var buildContext = AvatarProcessor.ProcessAvatar(clone, ResonitePlatform.Instance);
 
-                // Find a temp path under the project root
-                var tempPath = System.IO.Path.Combine(Application.temporaryCachePath, "tmp.resonitepackage");
-                
-                var asyncCall = ResonitePlatform._rpcClient.ConvertObjectAsync(new()
+                var root = new AvatarSerializer().Export(clone, buildContext.GetState<ResoniteBuildState>().cai);
+                var task = BuildController.Instance.BuildAvatar(client, root);
+
+                task.ContinueWith(_ =>
                 {
-                    Path = tempPath,
-                    Root = new AvatarSerializer().Export(clone, buildContext.GetState<ResoniteBuildState>().cai)
-                });
-
-                var progressId = Progress.Start("Building resonite package");
-
-                asyncCall.ResponseAsync.ContinueWith(task =>
-                {
-                    if (task.IsFaulted)
+                    NDMFSyncContext.RunOnMainThread(_ =>
                     {
-                        Debug.LogException(task.Exception);
-                    }
-                    else
-                    {
-                        Debug.Log("Resonite package built successfully: " + tempPath);
-                        // Put the path into the clipboard
-                        NDMFSyncContext.RunOnMainThread(path =>
-                        {
-                            EditorGUIUtility.systemCopyBuffer = (string) path;    
-                        }, tempPath);
-                    }
-
-                    Progress.Remove(progressId);
+                        _buildStateContainer.style.display = DisplayStyle.Flex;
+                        UpdateDisplayState();
+                    }, null);
                 });
             }
             finally

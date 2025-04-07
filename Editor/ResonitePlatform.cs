@@ -11,8 +11,6 @@ namespace nadena.dev.ndmf.platform.resonite
     [NDMFPlatformProvider]
     internal class ResonitePlatform : INDMFPlatformProvider
     {
-        internal static ResoPuppeteer.ResoPuppeteerClient _rpcClient { get; } = new Connector().Client;
-
         public static readonly INDMFPlatformProvider Instance = new ResonitePlatform();
         public string QualifiedName => WellKnownPlatforms.Resonite;
         public string DisplayName => "Resonite";

@@ -66,7 +66,12 @@ internal class Program
     }
     
     // ReSharper disable once UnusedMember.Global
-    internal static async Task Launch(string resoDirectory) {
+    internal static async Task Launch(
+        string resoDirectory,
+        string tempDirectory,
+        string pipeName,
+        int? autoShutdownTimeout
+    ) {
         UniLog.OnLog += l => System.Console.WriteLine("[LOG] " + l);
         UniLog.OnError += l => System.Console.WriteLine("[ERROR] " + l);
         UniLog.OnWarning += l => System.Console.WriteLine("[WARN] " + l);
@@ -78,11 +83,14 @@ internal class Program
 
         TaskCompletionSource shutdown = new();
 
+        var pendingEP = new PendingEntryPoint();
+        new RPCServer(pipeName).Start(pendingEP);
+
         var tickController = new TickController();
         StandaloneSystemInfo info = new StandaloneSystemInfo();
         LaunchOptions options = new LaunchOptions();
-        options.DataDirectory = StandaloneFrooxEngineRunner.DefaultDataDirectory;
-        options.CacheDirectory = StandaloneFrooxEngineRunner.DefaultCacheDirectory;
+        options.DataDirectory = Path.Combine(tempDirectory, "Data");
+        options.CacheDirectory = Path.Combine(tempDirectory, "Cache");
         var engine = new Engine();
 
         bool shutdownRequested = false;
@@ -111,6 +119,7 @@ internal class Program
         updateLoop.Start();
         
         Console.WriteLine("==== Startup complete ====");
+        pendingEP.SetBackend(new EntryPoint(engine, world, tickController));
 
         world.Coroutines.Post(_x =>
         {
@@ -128,8 +137,6 @@ internal class Program
             
             //engine.RequestShutdown();
         }, world);
-        
-        new RPCServer().Start(new EntryPoint(engine, world, tickController));
         
         await shutdown.Task;
         

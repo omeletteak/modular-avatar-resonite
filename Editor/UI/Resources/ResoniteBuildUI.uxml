@@ -7,5 +7,12 @@
 >
     <engine:VisualElement name="container">
         <engine:Button name="build" text="Build"/>
+        <engine:VisualElement name="build-state-container">
+            <engine:Label name="build-state-label" text="Building avatar..."/>
+            <engine:VisualElement name="build-hbox" enabled="false">
+                <engine:Button name="copy-path" text="Copy to Clipboard"/>
+                <engine:Button name="save-as" text="Save As..."/>
+            </engine:VisualElement>
+        </engine:VisualElement>
     </engine:VisualElement>
 </engine:UXML>

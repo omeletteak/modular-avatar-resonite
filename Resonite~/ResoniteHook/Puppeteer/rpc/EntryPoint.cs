@@ -1,10 +1,12 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using FrooxEngine;
 using FrooxEngine.Store;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using JetBrains.Annotations;
 using nadena.dev.ndmf.proto.rpc;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Constants;
 
 namespace nadena.dev.resonity.remote.puppeteer.rpc;
 
@@ -87,5 +89,17 @@ public class EntryPoint : nadena.dev.ndmf.proto.rpc.ResoPuppeteer.ResoPuppeteerB
         await converter.Convert(request.Root, request.Path);
 
         return new Empty();
+    }
+
+    public override Task<Empty> Ping(Empty request, ServerCallContext context)
+    {
+        Console.WriteLine("===== PING =====");
+        return Task.FromResult(new Empty());
+    }
+
+    public override Task<Empty> Shutdown(Empty request, ServerCallContext context)
+    {
+        Process.GetCurrentProcess().Kill();
+        return Task.FromResult(new Empty());
     }
 }

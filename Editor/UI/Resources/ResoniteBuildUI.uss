@@ -2,3 +2,12 @@ VisualElement {
 
 }
 
+#build-state-container {
+    display: none;
+}
+
+#build-hbox {
+    flex-direction: row;
+    justify-content: space-between;
+}
+

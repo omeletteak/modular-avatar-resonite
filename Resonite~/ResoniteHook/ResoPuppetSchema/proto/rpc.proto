@@ -7,6 +7,8 @@ import "proto/objects.proto";
 import "proto/base_types.proto";
 
 service ResoPuppeteer {
+  rpc Ping (google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc Shutdown (google.protobuf.Empty) returns (google.protobuf.Empty);
   rpc ConvertObject (ConvertObjectRequest) returns (google.protobuf.Empty);
 }
 

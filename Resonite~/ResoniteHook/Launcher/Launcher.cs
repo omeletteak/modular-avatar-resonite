@@ -1,25 +1,44 @@
-﻿using System.Reflection;
+﻿using System.CommandLine;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace nadena.dev.resonity.remote.bootstrap;
 
 public class Launcher
 {
-    private string resoniteBase = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite";
+    private const string defaultResoniteBase = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Resonite";
     private string assemblyBase;
     private string puppeteerBase;
 
     private List<string> assemblyPaths;
     private List<string> dllPaths;
-    
-    public Task Launch()
+
+    private string resoniteBase = defaultResoniteBase;
+    public string? tempDirectory;
+    public string? pipeName;
+    public int? autoShutdownTimeout;
+
+    public Task Launch(string[] args)
     {
+        ParseArgs(args);
+
+        if (tempDirectory == null)
+        {
+            throw new ArgumentNullException(nameof(tempDirectory), "Temp directory cannot be null");
+        }
+        
+        if (pipeName == null)
+        {
+            throw new ArgumentNullException(nameof(pipeName), "Pipe name cannot be null");
+        }
+        
         assemblyBase = resoniteBase + "\\Resonite_Data\\Managed\\";        
         
         System.Console.WriteLine("Starting Resonite Launcher");
 
         dllPaths = new()
         {
+            Path.GetDirectoryName(typeof(Launcher).Assembly.Location)!,
             assemblyBase,
             resoniteBase + "\\Resonite_Data\\Plugins\\x86_64\\",
             resoniteBase + "\\Tools\\",
@@ -65,7 +84,59 @@ public class Launcher
             throw new Exception("Could not find Main method in Puppeteer.Program");
         }
 
-        return (Task)main.Invoke(null, new object[] { resoniteBase })!;
+        return (Task)main.Invoke(null, [resoniteBase, tempDirectory, pipeName, autoShutdownTimeout])!;
+    }
+
+    private void ParseArgs(string[] args)
+    {
+        var resoInstallOption = new Option<string?>(
+            name: "--resonite-install-path",
+            description: "Path to the Resonite installation. Defaults to " + defaultResoniteBase);
+        var tempDirectory = new Option<string?>(
+            name: "--temp-directory",
+            description: "Path to the temporary directory used for resonite's LocalDB.");
+        var pipeName = new Option<string?>(
+            name: "--pipe-name",
+            description: "Name of the pipe used for communication with unity.");
+        var autoShutdownTimeout = new Option<int?>(
+            name: "--auto-shutdown-timeout",
+            description: "Time in seconds to wait before shutting down resonite. Defaults to not shutting down.");
+
+        var rootCommand = new RootCommand("Modular Avatar Resonite backend");
+        rootCommand.AddOption(resoInstallOption);
+        rootCommand.AddOption(tempDirectory);
+        rootCommand.AddOption(pipeName);
+        rootCommand.AddOption(autoShutdownTimeout);
+        
+        rootCommand.SetHandler((string? resoInstallPath, string? tempDirectory, string? pipeName, int? autoShutdownTimeout) =>
+        {
+            Console.WriteLine("resoInstallPath: " + resoInstallPath);
+            Console.WriteLine("tempDirectory: " + tempDirectory);
+            Console.WriteLine("pipeName: " + pipeName);
+            Console.WriteLine("autoShutdownTimeout: " + autoShutdownTimeout);
+            
+            if (resoInstallPath != null)
+            {
+                resoniteBase = resoInstallPath;
+            }
+
+            if (tempDirectory != null)
+            {
+                this.tempDirectory = tempDirectory;
+            }
+
+            if (pipeName != null)
+            {
+                this.pipeName = pipeName;
+            }
+
+            if (autoShutdownTimeout != null)
+            {
+                this.autoShutdownTimeout = autoShutdownTimeout;
+            }
+        }, resoInstallOption, tempDirectory, pipeName, autoShutdownTimeout);
+
+        rootCommand.Invoke(args);
     }
 
     private IntPtr DllImportResolver(string libraryname, Assembly assembly, DllImportSearchPath? searchpath)
