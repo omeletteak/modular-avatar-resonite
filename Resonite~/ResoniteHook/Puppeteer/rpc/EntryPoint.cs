@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using FrooxEngine;
 using FrooxEngine.Store;
@@ -18,12 +19,49 @@ public class EntryPoint : nadena.dev.ndmf.proto.rpc.ResoPuppeteer.ResoPuppeteerB
     private readonly TickController _tickController;
     
     private HashSet<Slot> _slots = new();
+
+    private TimeSpan? _autoShutdownTimeout;
+    private DateTime _lastPing = DateTime.UtcNow;
     
-    public EntryPoint(Engine engine, World world, TickController tickController)
+    public EntryPoint(Engine engine, World world, TickController tickController, int? autoShutdownTimeout)
     {
         _engine = engine;
         _world = world;
         _tickController = tickController;
+        _autoShutdownTimeout = autoShutdownTimeout != null ? TimeSpan.FromSeconds(autoShutdownTimeout.Value) : null;
+
+        if (_autoShutdownTimeout != null) Task.Run(Watchdog);
+    }
+
+    [SuppressMessage("ReSharper", "FunctionNeverReturns")]
+    private async Task Watchdog()
+    {
+        _tickController.OnRPCCompleted += () =>
+        {
+            _lastPing = DateTime.UtcNow;
+        };
+        
+        while (true)
+        {
+            var sinceLastPing = DateTime.UtcNow - _lastPing;
+            var remaining = _autoShutdownTimeout!.Value - sinceLastPing;
+            
+            if (remaining < TimeSpan.Zero)
+            {
+                if (_tickController.ActiveRPCs > 0)
+                {
+                    _lastPing = DateTime.UtcNow;
+                    continue;
+                }
+                
+                Console.WriteLine("Auto-shutdown triggered");
+                Process.GetCurrentProcess().Kill();
+            }
+            else
+            {
+                await Task.Delay(remaining);
+            }
+        }
     }
 
     Task<T> RunAsync<T>(Func<Task<T>> func)
@@ -94,6 +132,7 @@ public class EntryPoint : nadena.dev.ndmf.proto.rpc.ResoPuppeteer.ResoPuppeteerB
     public override Task<Empty> Ping(Empty request, ServerCallContext context)
     {
         Console.WriteLine("===== PING =====");
+        _lastPing = DateTime.UtcNow;
         return Task.FromResult(new Empty());
     }
 

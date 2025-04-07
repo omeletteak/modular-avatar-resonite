@@ -18,6 +18,9 @@ public class TickController
 {
     private int activeRPCs = 0;
     private AutoResetEvent requestFrame = new(false);
+    
+    public int ActiveRPCs => activeRPCs;
+    public event Action? OnRPCCompleted;
 
     public void WaitFrame()
     {
@@ -53,6 +56,7 @@ public class TickController
 
         void IDisposable.Dispose()
         {
+            controller.OnRPCCompleted?.Invoke();
             controller.activeRPCs--;
         }
     }
@@ -119,7 +123,7 @@ internal class Program
         updateLoop.Start();
         
         Console.WriteLine("==== Startup complete ====");
-        pendingEP.SetBackend(new EntryPoint(engine, world, tickController));
+        pendingEP.SetBackend(new EntryPoint(engine, world, tickController, autoShutdownTimeout));
 
         world.Coroutines.Post(_x =>
         {

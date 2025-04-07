@@ -163,7 +163,7 @@ namespace nadena.dev.ndmf.platform.resonite
 
         private static void PostStartup(Process process, ResoPuppeteer.ResoPuppeteerClient client)
         {
-            
+            // TODO: only ping while we need the server for something
             
             // ping the client every second so it doesn't time out and shut down
             Task.Run(async () =>
