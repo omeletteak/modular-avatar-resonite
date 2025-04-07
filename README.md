@@ -14,6 +14,7 @@ Planned:
 * Support for standalone projects (without VRCSDK avatar descriptor)
 * Support for attaching resonitepackages to your avatar at build time
 * Some kind of support for gestures
+* Support for using the unity humanoid bone names instead of relying on resonite heuristics to detect the rig
 
 To get started:
 * Install [ALCOM](https://vrc-get.anatawa12.com/en/alcom/). Please do not use the VCC to install this package.
