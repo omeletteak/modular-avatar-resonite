@@ -199,7 +199,6 @@ jobs:
           submodules: recursive
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ needs.prepare-release.outputs.commit_id }}
-          sparse-checkout: .github
         
       - name: Create tag
         run: |
