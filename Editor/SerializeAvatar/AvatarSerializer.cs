@@ -347,7 +347,7 @@ namespace nadena.dev.ndmf.platform.resonite
 
             foreach (Transform bone in r.bones)
             {
-                protoMeshRenderer.Bones.Add(MapObject(bone.gameObject));
+                protoMeshRenderer.Bones.Add(MapObject(bone?.gameObject));
             }
 
             var blendshapes = sharedMesh.blendShapeCount;
@@ -585,7 +585,7 @@ namespace nadena.dev.ndmf.platform.resonite
             var bindposes = mesh.bindposes;
             for (int i = 0; i < bindposes.Length; i++)
             {
-                var boneName = refBones?[i].gameObject.name ?? "Bone" + i;
+                var boneName = refBones?[i]?.gameObject.name ?? "Bone" + i;
                 var mat = new p.Matrix();
                 var pose = bindposes[i];
 
