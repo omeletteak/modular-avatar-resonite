@@ -406,45 +406,45 @@ namespace nadena.dev.ndmf.platform.resonite
 
                 protoTex.Bytes = new() { Inline = ByteString.CopyFrom(File.ReadAllBytes(filePath)) };
 
+                bool supported = true;
                 if (filePath.ToLowerInvariant().EndsWith(".png")) protoTex.Format = p.TextureFormat.Png;
                 else if (filePath.ToLowerInvariant().EndsWith(".jpg") || filePath.ToLowerInvariant().EndsWith(".jpeg"))
                     protoTex.Format = p.TextureFormat.Jpeg;
-                else throw new System.Exception("Unsupported texture format: " + filePath);
+                else supported = false;
 
-                return protoTex;
+                if (supported) return protoTex;
+            }
+        
+            // Convert to PNG (blit if necessary)
+            if (!tex2d.isReadable || tex2d.format != TextureFormat.ARGB32)
+            {
+                var tmpTex = new Texture2D(tex2d.width, tex2d.height, TextureFormat.ARGB32, false);
+                // We can't use copytexture as the formats may differ; bounce through a RenderTexture
+                var tmpRT = RenderTexture.GetTemporary(tex2d.width, tex2d.height, 0, RenderTextureFormat.ARGB32);
+                var priorRT = RenderTexture.active;
+                try
+                {
+                    Graphics.Blit(tex2d, tmpRT);
+                    RenderTexture.active = tmpRT;
+                    
+                    tmpTex.ReadPixels(new Rect(0, 0, tex2d.width, tex2d.height), 0, 0);
+                }
+                finally
+                {
+                    RenderTexture.active = priorRT;
+                }
+                
+                protoTex.Bytes = new() { Inline = ByteString.CopyFrom(tmpTex.EncodeToPNG()) };
+                UnityEngine.Object.DestroyImmediate(tmpTex);
             }
             else
             {
-                // Convert to PNG (blit if necessary)
-                if (!tex2d.isReadable || tex2d.format != TextureFormat.ARGB32)
-                {
-                    var tmpTex = new Texture2D(tex2d.width, tex2d.height, TextureFormat.ARGB32, false);
-                    // We can't use copytexture as the formats may differ; bounce through a RenderTexture
-                    var tmpRT = RenderTexture.GetTemporary(tex2d.width, tex2d.height, 0, RenderTextureFormat.ARGB32);
-                    var priorRT = RenderTexture.active;
-                    try
-                    {
-                        Graphics.Blit(tex2d, tmpRT);
-                        RenderTexture.active = tmpRT;
-                        
-                        tmpTex.ReadPixels(new Rect(0, 0, tex2d.width, tex2d.height), 0, 0);
-                    }
-                    finally
-                    {
-                        RenderTexture.active = priorRT;
-                    }
-                    
-                    protoTex.Bytes = new() { Inline = ByteString.CopyFrom(tmpTex.EncodeToPNG()) };
-                    UnityEngine.Object.DestroyImmediate(tmpTex);
-                }
-                else
-                {
-                    protoTex.Bytes = new() { Inline = ByteString.CopyFrom(tex2d.EncodeToPNG()) };
-                }
-                protoTex.Format = p.TextureFormat.Png;
-
-                return protoTex;
+                protoTex.Bytes = new() { Inline = ByteString.CopyFrom(tex2d.EncodeToPNG()) };
             }
+            protoTex.Format = p.TextureFormat.Png;
+
+            return protoTex;
+        
         }
 
         private IMessage TranslateMaterial(Material material)
