@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs: 
       need-new-tag: ${{ steps.check-tag.outputs.need-new-tag }}
-      commit_id: ${{ steps.update-version.outputs.commit_id }}
+      commit_id: ${{ steps.write-commit.outputs.commit_id }}
 
     steps:
       - name: Dump GitHub context
@@ -163,7 +163,8 @@ jobs:
 #          path: release-note.md
 #      - run: mv release-note.md .github
 
-      - name: Commit and tag version update
+      - name: Commit version update
+        id: write-commit
         run: |
           git commit -am "Release ${{ github.event.inputs.version }}"
           git push origin HEAD:release-staging-${{ github.event.inputs.version }} --force
@@ -198,6 +199,7 @@ jobs:
           submodules: recursive
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ needs.prepare-release.outputs.commit_id }}
+          sparse-checkout: .github
         
       - name: Create tag
         run: |
