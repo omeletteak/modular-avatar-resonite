@@ -199,10 +199,12 @@ jobs:
           submodules: recursive
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ needs.prepare-release.outputs.commit_id }}
+          fetch-depth: 0
         
       - name: Create tag
         run: |
           git tag -a ${{ github.event.inputs.version }} -m "Release ${{ github.event.inputs.version }}"
+          
       - name: Publish tag
         if: ${{ github.event.inputs.publish == 'true' }}
         run: |
