@@ -1,11 +1,10 @@
-﻿{
+{
   "name": "nadena.dev.modular-avatar.resonite",
   "displayName": "Modular Avatar - Resonite support",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "unity": "2022.3",
   "description": "",
-  "dependencies": {
-  },
+  "dependencies": {},
   "vpmDependencies": {
     "nadena.dev.ndmf": ">=1.8.0-alpha.4 <2.0.0-a"
   }
