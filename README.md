@@ -20,6 +20,7 @@ To get started:
 * Install [ALCOM](https://vrc-get.anatawa12.com/en/alcom/). Please do not use the VCC to install this package.
 * Add https://vpm.nadena.dev/vpm-reso.json to your VPM sources.
 * Install the `Modular Avatar - Resonite Support` package
+* Upgrade modular avatar to `1.13.0-alpha.0` or later 
 * Enable NDMF_EXPERIMENTAL define:
   * In your unity project: Open Edit -> Project Settings.
   * Select Project -> Player, then open "Other settings".
@@ -29,6 +30,7 @@ To get started:
 * Select your avatar, select Avatar Platform: Resonite, and click Build
 * Once "build finished" appears, click "copy to clipboard", then select your resonite window, and press Ctrl-V
 
+Note: AAO and TTT support is pending PRs to those projects.
 
 # 日本語版
 
@@ -41,6 +43,7 @@ VRCの揺れもの設定の自動変換などにも対応しています。
 * [ALCOM](https://vrc-get.anatawa12.com/ja/alcom/)をインストールします。（VCCを使用しないでください）
 * https://vpm.nadena.dev/vpm-reso.json をVPMのソースに追加します。
 * `Modular Avatar - Resonite Support`パッケージをインストールします。
+* Modular Avatarを`1.13.0-alpha.0`以上にアップグレードします。
 * NDMF_EXPERIMENTAL を有効にします：
   * Unityのプロジェクトで、Edit -> Project Settingsを開きます。
   * Project -> Playerを選択し、「Other settings」を開きます。
@@ -49,3 +52,5 @@ VRCの揺れもの設定の自動変換などにも対応しています。
 * Tools -> NDM Framework -> NDMF Consoleを開きます。
 * アバターを選択し、Avatar Platform: Resoniteを選択してBuildをクリックします。
 * 「build finished」と表示されたら、「copy to clipboard」をクリックし、Resoniteのウィンドウを選択してCtrl-Vを押します。
+
+※ AAOやTTTの対応は、PRのマージ待ちです。
