@@ -329,8 +329,8 @@ public partial class RootConverter
         m_alignAnchors!.Invoke(avatarCreator, [slot_left_hand]);
         m_alignAnchors.Invoke(avatarCreator, [slot_right_hand]);
 
-        slot_left_point.Position_Field.ActiveLink.ReleaseLink();
-        slot_right_point.Position_Field.ActiveLink.ReleaseLink();
+        slot_left_point.Position_Field.ActiveLink?.ReleaseLink();
+        slot_right_point.Position_Field.ActiveLink?.ReleaseLink();
         slot_left_point.GlobalPosition = leftPointPosition;
         slot_right_point.GlobalPosition = rightPointPosition;
 
