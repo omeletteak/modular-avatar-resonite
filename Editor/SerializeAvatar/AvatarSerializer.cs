@@ -205,120 +205,103 @@ namespace nadena.dev.ndmf.platform.resonite
 
         private void TransferHumanoidBones(p.AvatarDescriptor avatarDesc, Animator uAnimator)
         {
+            if (avatarDesc.EyelookConfig == null) avatarDesc.EyelookConfig = new();
+            avatarDesc.EyelookConfig.LeftEyeTransform = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftEye));
+            avatarDesc.EyelookConfig.RightEyeTransform = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightEye));
+            
             var bones = avatarDesc.Bones = new();
-            bones.Head = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.Head).gameObject);
+            bones.Head = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.Head));
+            bones.Chest = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.Chest));
+            bones.Spine = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.Spine));
+            bones.UpperChest = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.UpperChest));
+            bones.Neck = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.Neck));
+            bones.Hips = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.Hips));
 
             bones.LeftArm = new();
-            bones.LeftArm.Shoulder = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftShoulder).gameObject);
-            bones.LeftArm.UpperArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftUpperArm).gameObject);
-            bones.LeftArm.LowerArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLowerArm).gameObject);
-            bones.LeftArm.Hand = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftHand).gameObject);
+            bones.LeftArm.Shoulder = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftShoulder));
+            bones.LeftArm.UpperArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftUpperArm));
+            bones.LeftArm.LowerArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLowerArm));
+            bones.LeftArm.Hand = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftHand));
 
             bones.LeftArm.Index = new()
             {
-                Bones =
-                {
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftIndexProximal).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftIndexIntermediate).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftIndexDistal).gameObject)
-                }
+                Proximal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftIndexProximal)),
+                Intermediate = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftIndexIntermediate)),
+                Distal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftIndexDistal))
             };
-
             bones.LeftArm.Middle = new()
             {
-                Bones =
-                {
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftMiddleIntermediate).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftMiddleDistal).gameObject)
-                }
+                Proximal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal)),
+                Intermediate = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftMiddleIntermediate)),
+                Distal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftMiddleDistal))
             };
-
             bones.LeftArm.Ring = new()
             {
-                Bones =
-                {
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftRingProximal).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftRingIntermediate).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftRingDistal).gameObject)
-                }
+                Proximal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftRingProximal)),
+                Intermediate = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftRingIntermediate)),
+                Distal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftRingDistal))
             };
-
             bones.LeftArm.Pinky = new()
             {
-                Bones =
-                {
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLittleProximal).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLittleIntermediate).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLittleDistal).gameObject)
-                }
+                Proximal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLittleProximal)),
+                Intermediate = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLittleIntermediate)),
+                Distal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLittleDistal))
             };
-
             bones.LeftArm.Thumb = new()
             {
-                Bones =
-                {
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftThumbProximal).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftThumbDistal).gameObject)
-                }
+                Proximal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftThumbProximal)),
+                Distal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftThumbDistal))
             };
-
+            
             bones.RightArm = new();
-
-            bones.RightArm.Shoulder = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightShoulder).gameObject);
-            bones.RightArm.UpperArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightUpperArm).gameObject);
-            bones.RightArm.LowerArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLowerArm).gameObject);
-            bones.RightArm.Hand = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightHand).gameObject);
-
+            bones.RightArm.Shoulder = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightShoulder));
+            bones.RightArm.UpperArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightUpperArm));
+            bones.RightArm.LowerArm = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLowerArm));
+            bones.RightArm.Hand = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightHand));
             bones.RightArm.Index = new()
             {
-                Bones =
-                {
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightIndexProximal).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightIndexIntermediate).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightIndexDistal).gameObject)
-                }
+                Proximal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightIndexProximal)),
+                Intermediate = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightIndexIntermediate)),
+                Distal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightIndexDistal))
             };
-
             bones.RightArm.Middle = new()
             {
-                Bones =
-                {
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightMiddleProximal).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightMiddleIntermediate).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightMiddleDistal).gameObject)
-                }
+                Proximal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightMiddleProximal)),
+                Intermediate = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightMiddleIntermediate)),
+                Distal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightMiddleDistal))
             };
-
             bones.RightArm.Ring = new()
             {
-                Bones =
-                {
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightRingProximal).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightRingIntermediate).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightRingDistal).gameObject)
-                }
+                Proximal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightRingProximal)),
+                Intermediate = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightRingIntermediate)),
+                Distal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightRingDistal))
             };
-
             bones.RightArm.Pinky = new()
             {
-                Bones =
-                {
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLittleProximal).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLittleIntermediate).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLittleDistal).gameObject)
-                }
+                Proximal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLittleProximal)),
+                Intermediate = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLittleIntermediate)),
+                Distal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLittleDistal))
             };
-
             bones.RightArm.Thumb = new()
             {
-                Bones =
-                {
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightThumbProximal).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightThumbIntermediate).gameObject),
-                    MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightThumbDistal).gameObject)
-                }
+                Proximal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightThumbProximal)),
+                Distal = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightThumbDistal))
+            };
+            
+            bones.LeftLeg = new()
+            {
+                UpperLeg = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftUpperLeg)),
+                LowerLeg = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftLowerLeg)),
+                Foot = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftFoot)),
+                Toe = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.LeftToes))
+            };
+            
+            bones.RightLeg = new()
+            {
+                UpperLeg = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightUpperLeg)),
+                LowerLeg = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightLowerLeg)),
+                Foot = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightFoot)),
+                Toe = MapObject(uAnimator.GetBoneTransform(HumanBodyBones.RightToes))
             };
         }
 

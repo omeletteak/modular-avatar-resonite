@@ -24,7 +24,7 @@ To get started:
   * In your unity project: Open Edit -> Project Settings.
   * Select Project -> Player, then open "Other settings".
   * In the "Scripting Define Symbols" field, add `NDMF_EXPERIMENTAL` to the list of defines.
-    ![image](scripting-define.png)
+    ![image](readme-assets~/scripting-define.png)
 * Open Tools -> NDM Framework -> NDMF Console
 * Select your avatar, select Avatar Platform: Resonite, and click Build
 * Once "build finished" appears, click "copy to clipboard", then select your resonite window, and press Ctrl-V
@@ -45,7 +45,7 @@ VRCの揺れもの設定の自動変換などにも対応しています。
   * Unityのプロジェクトで、Edit -> Project Settingsを開きます。
   * Project -> Playerを選択し、「Other settings」を開きます。
   * 「Scripting Define Symbols」フィールドに、`NDMF_EXPERIMENTAL`を追加します。
-    ![image](scripting-define.png)
+    ![image](readme-assets~/scripting-define.png)
 * Tools -> NDM Framework -> NDMF Consoleを開きます。
 * アバターを選択し、Avatar Platform: Resoniteを選択してBuildをクリックします。
 * 「build finished」と表示されたら、「copy to clipboard」をクリックし、Resoniteのウィンドウを選択してCtrl-Vを押します。

@@ -45,7 +45,7 @@ namespace nadena.dev.ndmf.platform.resonite
             {
                 try
                 {
-                    await _client.PingAsync(new(), deadline: DateTime.Now.AddMilliseconds(250));
+                    await _client.PingAsync(new(), deadline: DateTime.UtcNow.AddMilliseconds(250));
                     return _client;
                 }
                 catch (Exception)
@@ -59,12 +59,13 @@ namespace nadena.dev.ndmf.platform.resonite
             try
             {
                 client = OpenChannel(DevPipeName);
-                await _client.PingAsync(new(), deadline: DateTime.Now.AddMilliseconds(250));
-                return client;
+                await client.PingAsync(new(), deadline: DateTime.UtcNow.AddMilliseconds(250));
+                return _client = client;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 // continue
+                Debug.LogException(e);
             }
             
             // Launch production server

@@ -46,7 +46,7 @@ public partial class RootConverter : IDisposable
         return (Asset<T>(id) as f.IWorldElement)?.ReferenceID ?? RefID.Null;
     }
 
-    private T? Object<T>(p::ObjectID? id) where T: class, f.IWorldElement
+    internal T? Object<T>(p::ObjectID? id) where T: class, f.IWorldElement
     {
         if (id == null) return null;
         

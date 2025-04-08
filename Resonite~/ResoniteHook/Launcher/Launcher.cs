@@ -14,8 +14,8 @@ public class Launcher
     private List<string> dllPaths;
 
     private string resoniteBase = defaultResoniteBase;
-    public string? tempDirectory;
-    public string? pipeName;
+    public string? tempDirectory = ".";
+    public string? pipeName = "MA_RESO_PUPPETEER_DEV";
     public int? autoShutdownTimeout;
 
     public Task Launch(string[] args)
@@ -110,11 +110,6 @@ public class Launcher
         
         rootCommand.SetHandler((string? resoInstallPath, string? tempDirectory, string? pipeName, int? autoShutdownTimeout) =>
         {
-            Console.WriteLine("resoInstallPath: " + resoInstallPath);
-            Console.WriteLine("tempDirectory: " + tempDirectory);
-            Console.WriteLine("pipeName: " + pipeName);
-            Console.WriteLine("autoShutdownTimeout: " + autoShutdownTimeout);
-            
             if (resoInstallPath != null)
             {
                 resoniteBase = resoInstallPath;
@@ -134,6 +129,11 @@ public class Launcher
             {
                 this.autoShutdownTimeout = autoShutdownTimeout;
             }
+            
+            Console.WriteLine("resoInstallPath: " + this.resoniteBase);
+            Console.WriteLine("tempDirectory: " + this.tempDirectory);
+            Console.WriteLine("pipeName: " + this.pipeName);
+            Console.WriteLine("autoShutdownTimeout: " + this.autoShutdownTimeout);
         }, resoInstallOption, tempDirectory, pipeName, autoShutdownTimeout);
 
         rootCommand.Invoke(args);

@@ -20,7 +20,7 @@ public partial class RootConverter
 {
     private const bool FREEZE_AVATAR = false;
     
-    private async Task<f.IComponent> SetupRig(f.Slot parent, p.RigRoot component)
+    private async Task SetupRig(f.Slot parent, p.AvatarDescriptor avDesc)
     {
         // This is a virtual component that tags a slot as being the root of a rigged model
         await new f.ToWorld();
@@ -46,59 +46,65 @@ public partial class RootConverter
         
         Defer(PHASE_RIG_SETUP, async () =>
         {
-            // Invoke ModelImporter to set up the rig
-            var settings = new f.ModelImportSettings()
-            {
-                //ForceTpose = true,
-                SetupIK = true,
-                GenerateColliders = true,
-                //GenerateSkeletonBoneVisuals = true,
-                //GenerateSnappables = true,
-            };
-            
-            Console.WriteLine("Root position: " + parent.Position_Field.Value);
-            
-            Type ty_modelImportData = typeof(f.ModelImporter).GetNestedType("ModelImportData", BindingFlags.NonPublic);
-            var mid_ctor = ty_modelImportData.GetConstructors()[0];
-            var modelImportData = mid_ctor.Invoke(new object[]
-            {
-                "",
-                null,
-                parent,
-                _assetRoot,
-                settings,
-                new NullProgress()
-            });
+            // Change all bone names to be what BipedRig expects (and any non-humanoid bones become temporary names)
 
-            ty_modelImportData.GetField("settings")!.SetValue(modelImportData, settings);
-        
-            typeof(f.ModelImporter).GetMethod(
-                "GenerateRigBones", 
-                BindingFlags.Static | BindingFlags.NonPublic,
-                null,
-                new []
+            using (var scope = RigNaming.Scope(this, _root, avDesc))
+            {
+                // Invoke ModelImporter to set up the rig
+                var settings = new f.ModelImportSettings()
                 {
-                    typeof(f.Rig), ty_modelImportData
-                },
-                null
+                    //ForceTpose = true,
+                    SetupIK = true,
+                    GenerateColliders = true,
+                    //GenerateSkeletonBoneVisuals = true,
+                    //GenerateSnappables = true,
+                };
+
+                Console.WriteLine("Root position: " + parent.Position_Field.Value);
+
+                Type ty_modelImportData =
+                    typeof(f.ModelImporter).GetNestedType("ModelImportData", BindingFlags.NonPublic);
+                var mid_ctor = ty_modelImportData.GetConstructors()[0];
+                var modelImportData = mid_ctor.Invoke(new object[]
+                {
+                    "",
+                    null,
+                    parent,
+                    _assetRoot,
+                    settings,
+                    new NullProgress()
+                });
+
+                ty_modelImportData.GetField("settings")!.SetValue(modelImportData, settings);
+
+                typeof(f.ModelImporter).GetMethod(
+                    "GenerateRigBones",
+                    BindingFlags.Static | BindingFlags.NonPublic,
+                    null,
+                    new[]
+                    {
+                        typeof(f.Rig), ty_modelImportData
+                    },
+                    null
                 )!.Invoke(null, [
                     rig, modelImportData
                 ]);
 
-            // Avoid the rig moving while we're setting up the avatar by disabling IK
-            rig.Slot.GetComponent<VRIK>().Enabled = false;
+                // Avoid the rig moving while we're setting up the avatar by disabling IK
+                rig.Slot.GetComponent<VRIK>().Enabled = false;
+            }
         });
         
         Defer(PHASE_ENABLE_RIG, () =>
         {
             if (!FREEZE_AVATAR) rig.Slot.GetComponent<VRIK>().Enabled = true;
         });
-        
-        return rig;
     }
 
     private async Task<f.IComponent?> SetupAvatar(f.Slot slot, p.AvatarDescriptor spec)
     {
+        await SetupRig(slot, spec);
+        
         Defer(PHASE_AVATAR_SETUP, () => SetupAvatarDeferred(slot, spec));
 
         return null;
@@ -359,7 +365,7 @@ public partial class RootConverter
 
         float MeasureFinger(p.Finger finger)
         {
-            var boneRef = finger.Bones.LastOrDefault();
+            var boneRef = finger.LastBone();
             if (boneRef == null) return 0;
             var lastBone = Object<f.Slot>(boneRef);
 

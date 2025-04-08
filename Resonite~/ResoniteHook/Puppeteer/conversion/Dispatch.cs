@@ -86,7 +86,6 @@ public partial class RootConverter
     {
         // Components
         RegisterComponentType<p::MeshRenderer>(CreateMeshRenderer);
-        RegisterComponentType<p::RigRoot>(SetupRig);
         RegisterComponentType<p::AvatarDescriptor>(SetupAvatar);
         RegisterComponentType<p::DynamicCollider>(ProcessDynamicCollider);
         RegisterComponentType<p::DynamicBone>(ProcessDynamicBone);
