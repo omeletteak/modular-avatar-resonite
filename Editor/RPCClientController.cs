@@ -19,12 +19,13 @@ namespace nadena.dev.ndmf.platform.resonite
 
         private static ResoPuppeteer.ResoPuppeteerClient? _client;
         private static Task<ResoPuppeteer.ResoPuppeteerClient>? _clientTask = null;
+        private static Process? _lastProcess;
         
         private static ResoPuppeteer.ResoPuppeteerClient OpenChannel(string pipeName)
         {
             var channel = new NamedPipeChannel(".", pipeName, new NamedPipeChannelOptions()
             {
-                ImpersonationLevel = TokenImpersonationLevel.None
+                ImpersonationLevel = TokenImpersonationLevel.None,
             });
             return new ResoPuppeteer.ResoPuppeteerClient(channel);
         }
@@ -68,7 +69,24 @@ namespace nadena.dev.ndmf.platform.resonite
                 Debug.LogException(e);
             }
             
+            var pipeName = ProdPipePrefix + Process.GetCurrentProcess().Id;
+
+            // check if our pipe is up and running
+            try
+            {
+                client = OpenChannel(pipeName);
+                await client.PingAsync(new(), deadline: DateTime.UtcNow.AddMilliseconds(250));
+                return _client = client;
+            }
+            catch (Exception e)
+            {
+                // continue
+                Debug.LogException(e);
+            }
+            
             // Launch production server
+            _lastProcess?.Kill();
+            
             var cwd = Path.GetFullPath("Packages/nadena.dev.modular-avatar.resonite/ResoPuppet~");
             var exe = Path.Combine(cwd, "Launcher.exe");
             
@@ -91,7 +109,6 @@ namespace nadena.dev.ndmf.platform.resonite
                 }
             }
             
-            var pipeName = ProdPipePrefix + Process.GetCurrentProcess().Id;
             var args = new string[]
             {
                 "--pipe-name", pipeName,
@@ -108,29 +125,28 @@ namespace nadena.dev.ndmf.platform.resonite
                 CreateNoWindow = false,
             };
             
-            var process = new Process
+            _lastProcess = new Process
             {
                 StartInfo = startInfo,
                 EnableRaisingEvents = true
             };
-            process.Exited += (sender, e) =>
+            _lastProcess.Exited += (sender, e) =>
             {
                 Console.WriteLine("Resonite Launcher exited");
                 _client = null;
             };
             
-            if (!process.Start())
+            if (!_lastProcess.Start())
             {
                 throw new Exception("Failed to start Resonite Launcher");
             }
-            
             
             // Register domain reload hook to shut down the server
             AppDomain.CurrentDomain.DomainUnload += (sender, e) =>
             {
                 try
                 {
-                    process.Kill();
+                    _lastProcess.Kill();
                 }
                 catch (Exception ex)
                 {
@@ -143,7 +159,7 @@ namespace nadena.dev.ndmf.platform.resonite
             {
                 try
                 {
-                    process.Kill();
+                    _lastProcess.Kill();
                 }
                 catch (Exception ex)
                 {
@@ -157,7 +173,7 @@ namespace nadena.dev.ndmf.platform.resonite
             await tmpClient.PingAsync(new(), deadline: DateTime.UtcNow.AddSeconds(15));
             _client = tmpClient;
 
-            PostStartup(process, _client);
+            PostStartup(_lastProcess, _client);
 
             return _client;
         }
