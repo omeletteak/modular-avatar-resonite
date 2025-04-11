@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Principal;
@@ -39,6 +40,11 @@ namespace nadena.dev.ndmf.platform.resonite
 
             return _clientTask = Task.Run(GetClient0);
         }
+
+        private static HashSet<string> ActivePipes()
+        {
+            return new HashSet<string>(System.IO.Directory.GetFiles("\\\\.\\pipe\\"));
+        }
         
         private static async Task<ResoPuppeteer.ResoPuppeteerClient> GetClient0()
         {
@@ -46,7 +52,7 @@ namespace nadena.dev.ndmf.platform.resonite
             {
                 try
                 {
-                    await _client.PingAsync(new(), deadline: DateTime.UtcNow.AddMilliseconds(250));
+                    await _client.PingAsync(new(), deadline: DateTime.UtcNow.AddMilliseconds(2000));
                     return _client;
                 }
                 catch (Exception)
@@ -55,33 +61,26 @@ namespace nadena.dev.ndmf.platform.resonite
                 }
             }
             
-            // check if the dev server is up and running
-            ResoPuppeteer.ResoPuppeteerClient client;
-            try
+            var activePipes = ActivePipes();
+            if (activePipes.Contains(DevPipeName))
             {
-                client = OpenChannel(DevPipeName);
-                await client.PingAsync(new(), deadline: DateTime.UtcNow.AddMilliseconds(250));
-                return _client = client;
-            }
-            catch (Exception e)
-            {
-                // continue
-                Debug.LogException(e);
+                return _client = OpenChannel(DevPipeName);
             }
             
             var pipeName = ProdPipePrefix + Process.GetCurrentProcess().Id;
 
-            // check if our pipe is up and running
-            try
+            // if there is already a server running, try to shut it down (since we've lost the process handle)
+            if (activePipes.Contains(pipeName))
             {
-                client = OpenChannel(pipeName);
-                await client.PingAsync(new(), deadline: DateTime.UtcNow.AddMilliseconds(250));
-                return _client = client;
-            }
-            catch (Exception e)
-            {
-                // continue
-                Debug.LogException(e);
+                try
+                {
+                    var preexisting = OpenChannel(pipeName);
+                    await preexisting.ShutdownAsync(new(), deadline: DateTime.UtcNow.AddMilliseconds(2000));
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning("Failed to shut down existing server: " + e);
+                }
             }
             
             // Launch production server
@@ -170,7 +169,7 @@ namespace nadena.dev.ndmf.platform.resonite
             var tmpClient = OpenChannel(pipeName);
             
             // Wait for the server to start
-            await tmpClient.PingAsync(new(), deadline: DateTime.UtcNow.AddSeconds(15));
+            await tmpClient.PingAsync(new(), deadline: DateTime.UtcNow.AddSeconds(60));
             _client = tmpClient;
 
             PostStartup(_lastProcess, _client);

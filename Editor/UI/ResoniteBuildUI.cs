@@ -85,7 +85,8 @@ namespace nadena.dev.ndmf.platform.resonite
         private void UpdateDisplayState()
         {
             _postBuildButtonContainer.SetEnabled(!BuildController.Instance.IsBuilding);
-            _buildButton.SetEnabled(!BuildController.Instance.IsBuilding);
+            _buildButton.SetEnabled(!BuildController.Instance.IsBuilding && _avatarRoot != null);
+            _buildButton.text = BuildController.Instance.IsBuilding ? "Build in progress..." : "Build";
             _buildStateLabel.text = BuildController.Instance.State;
         }
 

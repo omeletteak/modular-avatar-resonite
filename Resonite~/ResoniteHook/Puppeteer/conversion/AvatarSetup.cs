@@ -44,7 +44,7 @@ public partial class RootConverter
             relay.Renderers.Add(smr);
         }
         
-        Defer(PHASE_RIG_SETUP, async () =>
+        Defer(PHASE_RIG_SETUP, () =>
         {
             // Change all bone names to be what BipedRig expects (and any non-humanoid bones become temporary names)
 
@@ -93,6 +93,8 @@ public partial class RootConverter
                 // Avoid the rig moving while we're setting up the avatar by disabling IK
                 rig.Slot.GetComponent<VRIK>().Enabled = false;
             }
+
+            return Task.CompletedTask;
         });
         
         Defer(PHASE_ENABLE_RIG, () =>
@@ -227,6 +229,11 @@ public partial class RootConverter
 
         var avatarBuilderSlot = tmpSlot.AddSlot("Avatar Builder");
         var avatarCreator = avatarBuilderSlot.AttachComponent<f.AvatarCreator>();
+        
+        // Sleep one frame to ensure the avatar creator has time to initialize
+        await new f.ToBackground();
+        await new f.ToWorld();
+        
         var ref_headset = field<f.SyncRef<f.Slot>>(avatarCreator, "_headsetReference");
         var ref_left_hand = field<f.SyncRef<f.Slot>>(avatarCreator, "_leftReference");
         var ref_right_hand = field<f.SyncRef<f.Slot>>(avatarCreator, "_rightReference");
@@ -373,11 +380,6 @@ public partial class RootConverter
 
             return (hand.GlobalPosition - lastBone.GlobalPosition).Magnitude;
         }
-    }
-
-    async void SetupAvatar(f.Rig rig, p.AvatarDescriptor descriptor)
-    {
-        
     }
 
     T? field<T>(object obj, string name)
