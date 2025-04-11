@@ -15,6 +15,8 @@ public partial class RootConverter
     private const int PHASE_RIG_SETUP = 100;
     private const int PHASE_AVATAR_SETUP = 200;
     private const int PHASE_ENABLE_RIG = 500;
+
+    private const int PHASE_POSTPROCESS = 1000;
     
     private Dictionary<string, ComponentBuilder> ComponentTypes = new();
 

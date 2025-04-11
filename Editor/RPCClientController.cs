@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using GrpcDotNetNamedPipes;
@@ -21,6 +23,7 @@ namespace nadena.dev.ndmf.platform.resonite
         private static ResoPuppeteer.ResoPuppeteerClient? _client;
         private static Task<ResoPuppeteer.ResoPuppeteerClient>? _clientTask = null;
         private static Process? _lastProcess;
+        private static bool _isDebugBackend;
         
         private static ResoPuppeteer.ResoPuppeteerClient OpenChannel(string pipeName)
         {
@@ -43,12 +46,14 @@ namespace nadena.dev.ndmf.platform.resonite
 
         private static HashSet<string> ActivePipes()
         {
-            return new HashSet<string>(System.IO.Directory.GetFiles("\\\\.\\pipe\\"));
+            return new HashSet<string>(System.IO.Directory.GetFiles("\\\\.\\pipe\\")
+                .Select(p => p.Split("\\").Last())
+            );
         }
         
         private static async Task<ResoPuppeteer.ResoPuppeteerClient> GetClient0()
         {
-            if (_client != null)
+            if (_client != null && (_isDebugBackend || _lastProcess?.HasExited == false))
             {
                 try
                 {
@@ -64,9 +69,11 @@ namespace nadena.dev.ndmf.platform.resonite
             var activePipes = ActivePipes();
             if (activePipes.Contains(DevPipeName))
             {
+                _isDebugBackend = true;
                 return _client = OpenChannel(DevPipeName);
             }
-            
+
+            _isDebugBackend = false;
             var pipeName = ProdPipePrefix + Process.GetCurrentProcess().Id;
 
             // if there is already a server running, try to shut it down (since we've lost the process handle)
@@ -81,10 +88,15 @@ namespace nadena.dev.ndmf.platform.resonite
                 {
                     Debug.LogWarning("Failed to shut down existing server: " + e);
                 }
+                await Task.Delay(250); // give it some time to exit
             }
             
             // Launch production server
-            _lastProcess?.Kill();
+            if (_lastProcess?.HasExited == false)
+            {
+                _lastProcess?.Kill();
+                await Task.Delay(250); // give it some time to exit
+            }
             
             var cwd = Path.GetFullPath("Packages/nadena.dev.modular-avatar.resonite/ResoPuppet~");
             var exe = Path.Combine(cwd, "Launcher.exe");

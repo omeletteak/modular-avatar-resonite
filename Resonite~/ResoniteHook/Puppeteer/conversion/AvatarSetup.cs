@@ -6,6 +6,7 @@ using FrooxEngine.CommonAvatar;
 using FrooxEngine.FinalIK;
 using FrooxEngine.Store;
 using Google.Protobuf.Collections;
+using nadena.dev.resonity.remote.puppeteer.filters;
 using SkyFrost.Base;
 using Record = SkyFrost.Base.Record;
 
@@ -108,6 +109,7 @@ public partial class RootConverter
         await SetupRig(slot, spec);
         
         Defer(PHASE_AVATAR_SETUP, () => SetupAvatarDeferred(slot, spec));
+        Defer(PHASE_POSTPROCESS, () => new MeshLoadingFilter(_root).Apply());
 
         return null;
     }
