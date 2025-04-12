@@ -60,7 +60,7 @@ namespace nadena.dev.ndmf.platform.resonite
                 {
                     Path = tempPath,
                     Root = root
-                });
+                }, cancellationToken: RPCClientController.CancelAfter(120_000));
                 State = "Generating resonite package";
                 NDMFSyncContext.RunOnMainThread(_ => OnStateUpdate?.Invoke(), null);
                 await response;

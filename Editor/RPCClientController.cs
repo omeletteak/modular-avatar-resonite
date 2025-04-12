@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
 using GrpcDotNetNamedPipes;
 using JetBrains.Annotations;
@@ -50,6 +51,14 @@ namespace nadena.dev.ndmf.platform.resonite
                 .Select(p => p.Split("\\").Last())
             );
         }
+
+        internal static CancellationToken CancelAfter(int timeoutMs)
+        {
+            var token = new CancellationTokenSource();
+            token.CancelAfter(timeoutMs);
+
+            return token.Token;
+        }
         
         private static async Task<ResoPuppeteer.ResoPuppeteerClient> GetClient0()
         {
@@ -57,7 +66,7 @@ namespace nadena.dev.ndmf.platform.resonite
             {
                 try
                 {
-                    await _client.PingAsync(new(), deadline: DateTime.UtcNow.AddMilliseconds(2000));
+                    await _client.PingAsync(new(), cancellationToken: CancelAfter(2000));
                     return _client;
                 }
                 catch (Exception)
@@ -82,7 +91,7 @@ namespace nadena.dev.ndmf.platform.resonite
                 try
                 {
                     var preexisting = OpenChannel(pipeName);
-                    await preexisting.ShutdownAsync(new(), deadline: DateTime.UtcNow.AddMilliseconds(2000));
+                    await preexisting.ShutdownAsync(new(), cancellationToken: CancelAfter(2000));
                 }
                 catch (Exception e)
                 {
@@ -181,7 +190,7 @@ namespace nadena.dev.ndmf.platform.resonite
             var tmpClient = OpenChannel(pipeName);
             
             // Wait for the server to start
-            await tmpClient.PingAsync(new(), deadline: DateTime.UtcNow.AddSeconds(60));
+            await tmpClient.PingAsync(new(), cancellationToken: CancelAfter(60_000));
             _client = tmpClient;
 
             PostStartup(_lastProcess, _client);
