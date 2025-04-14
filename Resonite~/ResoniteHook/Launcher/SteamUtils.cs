@@ -19,12 +19,13 @@ public static class SteamUtils
             return Linux.GetGameInstallPath(appId);
         }
 
+        // ReSharper disable once ConvertIfStatementToReturnStatement
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             return MacOS.GetGameInstallPath(appId);
         }
 
-        throw new PlatformNotSupportedException("Unsupported operating system");
+        return null;
     }
 
     #region Windows Implementation
