@@ -21,14 +21,14 @@ jobs:
     steps:
       - name: Cache resonite
         id: cache-resonite
-        uses: actions/cache/restore@v4
+        uses: actions/cache@v4
         with:
           path: "${{ env.RESONITE_PATH }}"
           key: resonite-${{ env.CACHE_SALT }}
 
       - name: Cache steamcmd
         id: cache-steamcmd
-        uses: actions/cache/restore@v4
+        uses: actions/cache@v4
         with:
           path: c:\steamcmd
           key: steamcmd
@@ -55,18 +55,3 @@ jobs:
         id: install-resonite
         run: |
           c:\steamcmd\steamcmd +force_install_dir "${{ env.RESONITE_PATH }}" +login ${{ secrets.STEAMUSER }} ${{ secrets.STEAMPASS }} +app_update 2519830 +quit
-
-      - name: Save steamcmd cache
-        if: steps.install-resonite.outcome == 'success'
-        uses: actions/cache/save@v4
-        with:
-          key: ${{ steps.cache-steamcmd.outputs.cache-primary-key }}
-          path: c:\steamcmd
-
-      - name: Save resonite cache
-        if: steps.install-resonite.outcome == 'success'
-        uses: actions/cache/save@v4
-        with:
-          key: ${{ steps.cache-resonite.outputs.cache-primary-key }}
-          path: "${{ env.RESONITE_PATH }}"
-    
