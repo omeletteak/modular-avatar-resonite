@@ -27,7 +27,7 @@ namespace nadena.dev.ndmf.platform.resonite
 
         public bool IsBuilding => !busyState.IsCompleted;
         
-        public Task<string> BuildAvatar(Task<ResoPuppeteer.ResoPuppeteerClient> client, ExportRoot root)
+        public Task<string> BuildAvatar(ClientHandle client, ExportRoot root)
         {
             if (!busyState.IsCompleted) throw new InvalidOperationException("Build is already in progress");
 
@@ -37,7 +37,7 @@ namespace nadena.dev.ndmf.platform.resonite
             return task;
         }
 
-        private async Task<string?> BuildAvatar0(Task<ResoPuppeteer.ResoPuppeteerClient> clientTask, ExportRoot root)
+        private async Task<string?> BuildAvatar0(ClientHandle clientHandle, ExportRoot root)
         {
             var progressId = Progress.Start("Building resonite package");
 
@@ -47,12 +47,7 @@ namespace nadena.dev.ndmf.platform.resonite
 
             try
             {
-                var client = await clientTask;
-                if (client == null)
-                {
-                    Debug.LogError("Resonite puppet not connected");
-                    return null;
-                }
+                var client = await clientHandle.GetClient();
 
                 Progress.Report(progressId, 0, "Generating resonite package");
                 var tempPath = System.IO.Path.Combine(Application.temporaryCachePath, "tmp.resonitepackage");

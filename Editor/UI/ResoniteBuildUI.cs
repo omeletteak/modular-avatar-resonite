@@ -93,7 +93,7 @@ namespace nadena.dev.ndmf.platform.resonite
         private void BuildAvatar()
         {
             // Start the server in the background
-            var client = RPCClientController.GetClient();
+            using var client = RPCClientController.ClientHandle();
             
             var clone = GameObject.Instantiate(_avatarRoot);
             clone.name = clone.name.Substring(0, clone.name.Length - "(clone)".Length);

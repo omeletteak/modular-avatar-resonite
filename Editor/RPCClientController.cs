@@ -25,7 +25,7 @@ namespace nadena.dev.ndmf.platform.resonite
         private static Task<ResoPuppeteer.ResoPuppeteerClient>? _clientTask = null;
         private static Process? _lastProcess;
         private static bool _isDebugBackend;
-        
+
         private static ResoPuppeteer.ResoPuppeteerClient OpenChannel(string pipeName)
         {
             var channel = new NamedPipeChannel(".", pipeName, new NamedPipeChannelOptions()
@@ -34,7 +34,14 @@ namespace nadena.dev.ndmf.platform.resonite
             });
             return new ResoPuppeteer.ResoPuppeteerClient(channel);
         }
-        
+
+        public static ClientHandle ClientHandle()
+        {
+            var client = GetClient();
+
+            return new ClientHandle(client);
+        }
+
         public static Task<ResoPuppeteer.ResoPuppeteerClient> GetClient()
         {
             if (_clientTask != null && !_clientTask.IsCompleted)
@@ -59,7 +66,7 @@ namespace nadena.dev.ndmf.platform.resonite
 
             return token.Token;
         }
-        
+
         private static async Task<ResoPuppeteer.ResoPuppeteerClient> GetClient0()
         {
             if (_client != null && (_isDebugBackend || _lastProcess?.HasExited == false))
@@ -74,7 +81,7 @@ namespace nadena.dev.ndmf.platform.resonite
                     // continue
                 }
             }
-            
+
             var activePipes = ActivePipes();
             if (activePipes.Contains(DevPipeName))
             {
@@ -97,24 +104,25 @@ namespace nadena.dev.ndmf.platform.resonite
                 {
                     Debug.LogWarning("Failed to shut down existing server: " + e);
                 }
+
                 await Task.Delay(250); // give it some time to exit
             }
-            
+
             // Launch production server
             if (_lastProcess?.HasExited == false)
             {
                 _lastProcess?.Kill();
                 await Task.Delay(250); // give it some time to exit
             }
-            
+
             var cwd = Path.GetFullPath("Packages/nadena.dev.modular-avatar.resonite/ResoPuppet~");
             var exe = Path.Combine(cwd, "Launcher.exe");
-            
+
             if (!File.Exists(exe))
             {
                 throw new FileNotFoundException("Resonite Launcher not found", exe);
             }
-            
+
             var tempDir = Path.Combine(Path.GetTempPath(), "ResonitePuppet");
             // Clean up old temp dir
             if (Directory.Exists(tempDir))
@@ -128,14 +136,14 @@ namespace nadena.dev.ndmf.platform.resonite
                     Console.WriteLine($"Failed to delete temp dir: {e}");
                 }
             }
-            
+
             var args = new string[]
             {
                 "--pipe-name", pipeName,
                 "--temp-directory", tempDir,
                 "--auto-shutdown-timeout", "30"
             };
-            
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = exe,
@@ -144,7 +152,7 @@ namespace nadena.dev.ndmf.platform.resonite
                 UseShellExecute = false,
                 CreateNoWindow = false,
             };
-            
+
             _lastProcess = new Process
             {
                 StartInfo = startInfo,
@@ -155,12 +163,12 @@ namespace nadena.dev.ndmf.platform.resonite
                 Console.WriteLine("Resonite Launcher exited");
                 _client = null;
             };
-            
+
             if (!_lastProcess.Start())
             {
                 throw new Exception("Failed to start Resonite Launcher");
             }
-            
+
             // Register domain reload hook to shut down the server
             AppDomain.CurrentDomain.DomainUnload += (sender, e) =>
             {
@@ -173,7 +181,7 @@ namespace nadena.dev.ndmf.platform.resonite
                     Console.WriteLine($"Failed to kill Resonite Launcher: {ex}");
                 }
             };
-            
+
             // Also register the process exit hook
             AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
             {
@@ -186,39 +194,47 @@ namespace nadena.dev.ndmf.platform.resonite
                     Console.WriteLine($"Failed to kill Resonite Launcher: {ex}");
                 }
             };
-            
+
             var tmpClient = OpenChannel(pipeName);
-            
+
             // Wait for the server to start
             await tmpClient.PingAsync(new(), cancellationToken: CancelAfter(60_000));
             _client = tmpClient;
 
-            PostStartup(_lastProcess, _client);
-
             return _client;
         }
+    }
 
-        private static void PostStartup(Process process, ResoPuppeteer.ResoPuppeteerClient client)
+    internal class ClientHandle : IDisposable
+    {
+        private readonly Task<ResoPuppeteer.ResoPuppeteerClient> _clientTask;
+        private bool _isDisposed = false;
+        
+        public ClientHandle(Task<ResoPuppeteer.ResoPuppeteerClient> client)
         {
-            // TODO: only ping while we need the server for something
+            _clientTask = client;
             
-            // ping the client every second so it doesn't time out and shut down
+            var currentContext = SynchronizationContext.Current;
+            SynchronizationContext.SetSynchronizationContext(null);
             Task.Run(async () =>
             {
-                while (true)
+                while (!_isDisposed)
                 {
-                    try
-                    {
-                        await Task.Delay(1000);
-                        client.Ping(new());
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine($"Failed to ping Resonite Launcher: {e}");
-                        break;
-                    }
+                    await Task.Delay(1000);
+                    await (await _clientTask).PingAsync(new());
                 }
             });
+            SynchronizationContext.SetSynchronizationContext(currentContext);
+        }
+        
+        public Task<ResoPuppeteer.ResoPuppeteerClient> GetClient()
+        {
+            return _clientTask;
+        }
+
+        public void Dispose()
+        {
+            _isDisposed = true;
         }
     }
 }
