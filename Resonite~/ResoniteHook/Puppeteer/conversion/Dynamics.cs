@@ -86,18 +86,19 @@ public partial class RootConverter
     private async Task<f.IComponent?> ProcessDynamicBone(f.Slot parent, p.DynamicBone bone, p.ObjectID _)
     {
         var boneChild = parent.AddSlot("Dynamic Bone");
-        var root = Object<f.Slot>(bone.RootTransform) ?? throw new Exception("Dynamic bone root not found");
 
-        var ignored = bone.IgnoreTransforms.Select(Object<f.Slot>)
-            .Where(t => t != null)
-            .Select(t => t!)
-            .ToHashSet();
-        ignored.Add(boneChild);
-        
-        var db = boneChild.AttachComponent<f.DynamicBoneChain>();
-        
         Defer(PHASE_RESOLVE_REFERENCES, async () =>
         {
+            var root = Object<f.Slot>(bone.RootTransform) ?? throw new Exception("Dynamic bone root not found");
+
+            var ignored = bone.IgnoreTransforms.Select(Object<f.Slot>)
+                .Where(t => t != null)
+                .Select(t => t!)
+                .ToHashSet();
+            ignored.Add(boneChild);
+        
+            var db = boneChild.AttachComponent<f.DynamicBoneChain>();
+
             db.SetupFromChildren(root, false, slot => !ignored.Contains(slot));
 
             db.BaseBoneRadius.Value = bone.BaseRadius;
@@ -112,7 +113,7 @@ public partial class RootConverter
             GenerateTemplateControls(db, bone.TemplateName);
         });
         
-        return db;
+        return null;
     }
 
     private void GenerateTemplateControls(f.DynamicBoneChain db, string templateName)
