@@ -18,6 +18,28 @@ public class Launcher
     public string? pipeName = "MA_RESO_PUPPETEER_DEV";
     public int? autoShutdownTimeout;
 
+    public void ConfigurePaths(string? resonitePath = null)
+    {
+        resoniteBase = resonitePath ?? SteamUtils.GetGamePath(2519830) ?? defaultResoniteBase;
+        
+        assemblyBase = resoniteBase + "\\Resonite_Data\\Managed\\";       
+        
+        dllPaths = new()
+        {
+            Path.GetDirectoryName(typeof(Launcher).Assembly.Location)!,
+            assemblyBase,
+            resoniteBase + "\\Resonite_Data\\Plugins\\x86_64\\",
+            resoniteBase + "\\Tools\\",
+        };
+
+        AppDomain.CurrentDomain.AssemblyLoad += (sender, args) =>
+        {
+            NativeLibrary.SetDllImportResolver(args.LoadedAssembly, DllImportResolver);    
+        };
+        
+        AppDomain.CurrentDomain.AssemblyResolve += OnResolveFailed;
+    }
+
     public Task Launch(string[] args)
     {
         ParseArgs(args);
@@ -31,31 +53,10 @@ public class Launcher
         {
             throw new ArgumentNullException(nameof(pipeName), "Pipe name cannot be null");
         }
-        
-        var gamePath = SteamUtils.GetGamePath(2519830);
-        resoniteBase = gamePath ?? defaultResoniteBase;
-        
-        assemblyBase = resoniteBase + "\\Resonite_Data\\Managed\\";        
+         
+        ConfigurePaths();
         
         System.Console.WriteLine("Starting Resonite Launcher");
-
-        dllPaths = new()
-        {
-            Path.GetDirectoryName(typeof(Launcher).Assembly.Location)!,
-            assemblyBase,
-            resoniteBase + "\\Resonite_Data\\Plugins\\x86_64\\",
-            resoniteBase + "\\Tools\\",
-        };
-        
-        // Manually load assimp; it directly loads itself without going through NativeLibrary
-        //NativeLibrary.Load(resoniteBase + "\\Tools\\assimp.dll");
-        
-        AppDomain.CurrentDomain.AssemblyLoad += (sender, args) =>
-        {
-            NativeLibrary.SetDllImportResolver(args.LoadedAssembly, DllImportResolver);    
-        };
-        
-        AppDomain.CurrentDomain.AssemblyResolve += OnResolveFailed;
 
         /*
         var puppeteer = Assembly.LoadFile("Puppeteer.dll");
@@ -185,7 +186,7 @@ public class Launcher
         {
             return Assembly.LoadFile(puppeteerBase + name + ".dll");
         }
-        catch (FileNotFoundException e)
+        catch (Exception)
         {
             try
             {

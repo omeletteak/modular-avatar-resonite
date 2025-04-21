@@ -23,11 +23,11 @@ public class EntryPoint : nadena.dev.ndmf.proto.rpc.ResoPuppeteer.ResoPuppeteerB
     private TimeSpan? _autoShutdownTimeout;
     private DateTime _lastPing = DateTime.UtcNow;
     
-    public EntryPoint(Engine engine, World world, TickController tickController, int? autoShutdownTimeout)
+    public EntryPoint(EngineController controller, int? autoShutdownTimeout)
     {
-        _engine = engine;
-        _world = world;
-        _tickController = tickController;
+        _engine = controller.Engine;
+        _world = controller.World;
+        _tickController = controller.TickController;
         _autoShutdownTimeout = autoShutdownTimeout != null ? TimeSpan.FromSeconds(autoShutdownTimeout.Value) : null;
 
         if (_autoShutdownTimeout != null) Task.Run(Watchdog);

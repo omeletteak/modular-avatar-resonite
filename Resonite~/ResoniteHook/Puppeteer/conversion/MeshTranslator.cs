@@ -81,8 +81,21 @@ public static class MeshTranslator
             meshx.FillInEmptyBindings(0);
         }
 
+        var blendshapeNames = new HashSet<string>();
         foreach (var blendshape in rpcMesh.Blendshapes)
         {
+            if (!blendshapeNames.Add(blendshape.Name))
+            {
+                var index = 0;
+                string newName;
+                do
+                {
+                    newName = blendshape.Name + "." + (index++);
+                } while (!blendshapeNames.Add(newName));
+
+                blendshape.Name = newName;
+            } 
+            
             var blendshapeX = meshx.AddBlendShape(blendshape.Name);
 
             foreach (var frame in blendshape.Frames)
