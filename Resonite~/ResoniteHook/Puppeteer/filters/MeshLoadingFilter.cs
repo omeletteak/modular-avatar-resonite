@@ -2,9 +2,14 @@
 using FrooxEngine;
 using FrooxEngine.FrooxEngine.ProtoFlux.CoreNodes;
 using FrooxEngine.ProtoFlux;
+using FrooxEngine.ProtoFlux.Runtimes.Execution;
 using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Casts;
 using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Assets;
-using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Async;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Math.Random;
 using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using nadena.dev.resonity.remote.puppeteer.dynamic_flux;
 
@@ -46,30 +51,85 @@ public class MeshLoadingFilter
             {
                 assetLoadingStatus.Add(CreateAssetLoadingStatusChecker(loadingCheckGroup, mesh));
             }
+            assetLoadingStatus.Reverse();
         }
-        
-        var boolAND = rootFlux.Spawn<AND_Multi_Bool>();
+
+        INodeValueOutput<bool> notLoaded;
+        var boolNAND = rootFlux.Spawn<NAND_Multi_Bool>();
         foreach (var status in assetLoadingStatus)
         {
-            boolAND.Operands.Add().Target = status;
+            boolNAND.Operands.Add().Target = status;
+        }
+
+        notLoaded = boolNAND;
+
+        DataModelBooleanToggle updateTrigger;
+        INodeValueOutput<bool> updateTriggerOutput;
+        SyncRef<ISyncNodeOperation> flowNode;
+        
+        using (var vertical = rootFlux.Vertical())
+        {
+            flowNode = vertical.Spawn<OnStart>().Trigger;
+            updateTrigger = vertical.Spawn<DataModelBooleanToggle>();
+            
+            updateTriggerOutput = updateTrigger;
+        }
+
+        INodeValueOutput<bool> isLoadedWithTrigger;
+        INodeValueOutput<bool> notLoadedWithTrigger;
+        using (var vertical = rootFlux.Vertical())
+        {
+            var and1 = vertical.Spawn<AND_Bool>();
+            and1.A.Target = notLoaded;
+            notLoadedWithTrigger = and1;
+            
+            var nand2 = vertical.Spawn<NAND_Bool>();
+            nand2.A.Target = notLoaded;
+            isLoadedWithTrigger = nand2;
+            
+            var eq = vertical.Spawn<ValueEquals<bool>>();
+            eq.A.Target = updateTriggerOutput;
+            eq.B.Target = updateTriggerOutput;
+            
+            and1.B.Target = eq;
+            nand2.B.Target = eq;
         }
 
         using (var vertical = rootFlux.Vertical())
         {
             var driver = vertical.Spawn<ValueFieldDrive<bool>>();
             driver.TrySetRootTarget(checkRootValue.Value);
-            driver.Value.Target = boolAND;
+            driver.Value.Target = isLoadedWithTrigger;
 
             using (var horizontal = vertical.Horizontal())
             {
-                var notGate = horizontal.Spawn<NOT_Bool>();
-                notGate.A.Target = boolAND;
-                
                 var spinnerDriver = horizontal.Spawn<ValueFieldDrive<bool>>();
                 spinnerDriver.TrySetRootTarget(loadingSpinner.ActiveSelf_Field);
-                spinnerDriver.Value.Target = notGate;
+                spinnerDriver.Value.Target = notLoadedWithTrigger;
             }
         }
+
+        SyncRef<INodeOperation> asyncFlow;
+        
+        var startAsyncTask = rootFlux.Spawn<StartAsyncTask>();
+        flowNode.Target = startAsyncTask;
+        asyncFlow = startAsyncTask.TaskStart;
+
+        var loop = rootFlux.Spawn<AsyncWhile>();
+        loop.Condition.Target = boolNAND;
+        asyncFlow.Target = loop;
+
+        using (var vertical = rootFlux.Vertical())
+        {
+            var loopTime = vertical.Spawn<ValueInput<float>>();
+            loopTime.Value.Value = 0.25f;
+
+            var loopDelay = vertical.Spawn<DelayUpdatesOrSecondsFloat>();
+            loopDelay.Duration.Target = loopTime;
+            loop.LoopIteration.Target = loopDelay;
+        }
+
+        loop.LoopEnd.Target = updateTrigger.Toggle;
     }
 
     private async Task<Slot> SpawnLoadingSpinner()
@@ -90,35 +150,21 @@ public class MeshLoadingFilter
     {
         using var flux = loadingCheckGroup.Horizontal("Status Check: " + mesh.Slot.Name);
 
-        UsersAssetLoadProgress<Mesh> userLoadingStatus = mesh.Slot.AttachComponent<UsersAssetLoadProgress<Mesh>>();
-        userLoadingStatus.Asset.Target = mesh;
+        var reference = flux.Spawn<ElementSource<StaticMesh>>();
+        reference.TrySetRootSource(mesh);
 
-        ElementSource<UsersAssetLoadProgress<Mesh>> source;
-        LocalUser localUser;
-        using (var vertical = flux.Vertical())
-        {
-            source = flux.Spawn<ElementSource<UsersAssetLoadProgress<Mesh>>>();
-            source.TrySetRootSource(userLoadingStatus);
-            
-            localUser = vertical.Spawn<LocalUser>();
-        }
+        var cast = flux.Spawn<ObjectCast<StaticMesh, IAssetProvider<Mesh>>>();
+        cast.Input.Target = reference;
+        
+        var getAsset = flux.Spawn<GetAsset<Mesh>>();
+        getAsset.Provider.Target = cast;
 
-        AssetLoadProgress<Mesh> loadingStatus;
-        ValueInput<AssetLoadState> fullyLoaded;
-        using (var vertical = flux.Vertical())
-        {
-            loadingStatus = vertical.Spawn<AssetLoadProgress<Mesh>>();
-            loadingStatus.Tracker.Target = source;
-            loadingStatus.User.Target = localUser;
+        var isNull = flux.Spawn<IsNull<Mesh>>();
+        isNull.Instance.Target = getAsset;
 
-            fullyLoaded = vertical.Spawn<ValueInput<AssetLoadState>>();
-            fullyLoaded.Value.Value = AssetLoadState.FullyLoaded;
-        }
+        var not = flux.Spawn<NOT_Bool>();
+        not.A.Target = isNull;
 
-        var eq = flux.Spawn<ValueEquals<AssetLoadState>>();
-        eq.A.Target = loadingStatus.LoadState;
-        eq.B.Target = fullyLoaded;
-
-        return eq;
+        return not;
     }
 }
