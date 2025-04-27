@@ -238,8 +238,22 @@ public partial class RootConverter : IDisposable
         if (size.x <= texture.MaxResolution && size.y <= texture.MaxResolution) return;
 
         Console.WriteLine("Resizing texture " + textureComponent.Slot.Name + " to " + texture.MaxResolution);
+<<<<<<< HEAD
         
         await textureComponent.Rescale((int) texture.MaxResolution, Filtering.Lanczos3);
+=======
+
+        try
+        {
+            await textureComponent.Rescale((int)texture.MaxResolution, Filtering.Lanczos3);
+        }
+        catch (Exception)
+        {
+            // Suppress noisy stack traces if we failed and destroyed the avatar root before the resize finished
+            if (textureComponent.IsDestroyed) return;
+            throw;
+        }
+>>>>>>> d89f705 (fix: texture import size and normal map settings aren't respected)
     }
 
     private async Task<f.IWorldElement?> CreateMesh(string name, p::mesh.Mesh mesh)
