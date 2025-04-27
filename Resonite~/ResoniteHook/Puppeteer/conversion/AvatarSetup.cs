@@ -349,6 +349,15 @@ public partial class RootConverter
         // TODO - scale adjustment
         
         if (!FREEZE_AVATAR) avatarCreator.GetType().GetMethod("RunCreate", BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(avatarCreator, null);
+
+        var headProxy = _root.FindChild("Head Proxy");
+        var target = headProxy?.FindChild("Target");
+        if (target != null)
+        {
+            var origTargetPos = target.GlobalPosition;
+            headProxy.LocalPosition = spec.EyePosition.Vec3();
+            target.GlobalPosition = origTargetPos;
+        }
         
         
         void SetAnchorPositions(f.Slot hand, float3 fwd)
