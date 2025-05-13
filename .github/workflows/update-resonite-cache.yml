@@ -57,7 +57,7 @@ jobs:
         if: github.event_name == 'pull_request'
         id: select-cache-key
         run: |
-          if ( ${{ steps.check-resonite-cache.outputs.cache-hit }} ) || [ ${{ github.event_name }} != 'pull_request' ] {
+          if [ ${{ steps.check-resonite-cache.outputs.cache-hit }} == true ] || [ ${{ github.event_name }} != 'pull_request' ] {
             echo "cache_key=${{ steps.date.outputs.cache_key }}" >> $env:GITHUB_OUTPUT
           } else {
             echo "cache_key=${{ steps.date.outputs.prior_cache_key }}" >> $env:GITHUB_OUTPUT
