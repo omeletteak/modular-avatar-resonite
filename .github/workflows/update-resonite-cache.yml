@@ -54,7 +54,6 @@ jobs:
           key: ${{ steps.date.outputs.prior_cache_key }}
 
       - name: Select cache key to use
-        if: github.event_name == 'pull_request'
         id: select-cache-key
         run: |
           if ( "${{ steps.check-resonite-cache.outputs.cache-hit }}" -eq "true" -or "${{ github.event_name }}" -ne 'pull_request' ) {
