@@ -20,7 +20,7 @@ env:
 jobs:
   generate-or-check-cache:
     outputs:
-      resonite_cache_key: ${{ steps.date.outputs.cache_key }}
+      resonite_cache_key: ${{ steps.select-cache-key.outputs.cache_key }}
       
     runs-on: windows-latest
 
@@ -47,13 +47,24 @@ jobs:
           lookup-only: 'true'
           
       - name: Try to restore prior day cache
+        if: github.event_name != 'pull_request' && steps.check-resonite-cache.outputs.cache-hit != 'true'
         uses: actions/cache/restore@v4
         with:
           path: "${{ env.RESONITE_PATH }}"
           key: ${{ steps.date.outputs.prior_cache_key }}
 
+      - name: Select cache key to use
+        if: github.event_name == 'pull_request'
+        id: select-cache-key
+        run: |
+          if ( ${{ steps.check-resonite-cache.outputs.cache-hit }} ) || [ ${{ github.event_name }} != 'pull_request' ] {
+            echo "cache_key=${{ steps.date.outputs.cache_key }}" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "cache_key=${{ steps.date.outputs.prior_cache_key }}" >> $env:GITHUB_OUTPUT
+          }
+          
       - name: Setup steamcmd
-        if: steps.check-resonite-cache.outputs.cache-hit != 'true'
+        if: github.event_name != 'pull_request' && steps.check-resonite-cache.outputs.cache-hit != 'true'
         run: |
           cd c:\
           Invoke-WebRequest https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip -OutFile c:\steamcmd.zip
@@ -62,7 +73,7 @@ jobs:
           dir c:\steamcmd
 
       - name: Update steamcmd
-        if: steps.check-resonite-cache.outputs.cache-hit != 'true'
+        if: github.event_name != 'pull_request' && steps.check-resonite-cache.outputs.cache-hit != 'true'
         run: |
           $ErrorAction = "Ignore"
           # run updater first
@@ -72,14 +83,14 @@ jobs:
 
 
       - name: Install or update resonite
-        if: steps.check-resonite-cache.outputs.cache-hit != 'true'
+        if: github.event_name != 'pull_request' && steps.check-resonite-cache.outputs.cache-hit != 'true'
         id: install-resonite
         run: |
           c:\steamcmd\steamcmd +force_install_dir "${{ env.RESONITE_PATH }}" +login ${{ secrets.STEAMUSER }} ${{ secrets.STEAMPASS }} +app_update 2519830 +quit
 
       - name: Save cache
         uses: actions/cache/save@v4
-        if: steps.check-resonite-cache.outputs.cache-hit != 'true'
+        if: github.event_name != 'pull_request' && steps.check-resonite-cache.outputs.cache-hit != 'true'
         with:
           path: "${{ env.RESONITE_PATH }}"
           key: ${{ steps.date.outputs.cache_key }}
