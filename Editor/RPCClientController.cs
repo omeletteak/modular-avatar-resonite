@@ -15,21 +15,23 @@ using nadena.dev.ndmf.proto.rpc;
 using NUnit.Framework.Internal;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using OSPlatform = System.Runtime.InteropServices.OSPlatform;
 
 namespace nadena.dev.ndmf.platform.resonite
 {
     internal class RPCClientController
     {
-        private const string DevPipeName = "MA_RESO_PUPPETEER_DEV";
-        private const string ProdPipePrefix = "ModularAvatarResonite_PuppetPipe_";
 
         private static ResoPuppeteer.ResoPuppeteerClient? _client;
         private static Task<ResoPuppeteer.ResoPuppeteerClient>? _clientTask = null;
+        private static PipeManager _pipePathManager = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? new WindowsPipeManager() : new LinuxPipeManager();
+        private static string _executableBinaryExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : "";
         private static Process? _lastProcess;
         private static bool _isDebugBackend;
 
         private static CancellationTokenSource _logStreamCancellationToken = new();
-        
+        internal const string RESOPUPPET_DIR = "Packages/nadena.dev.modular-avatar.resonite/ResoPuppet~";
+
         private static ResoPuppeteer.ResoPuppeteerClient OpenChannel(string pipeName)
         {
             var channel = new NamedPipeChannel(".", pipeName, new NamedPipeChannelOptions()
@@ -100,13 +102,6 @@ namespace nadena.dev.ndmf.platform.resonite
             return _clientTask = Task.Run(GetClient0);
         }
 
-        private static HashSet<string> ActivePipes()
-        {
-            return new HashSet<string>(System.IO.Directory.GetFiles("\\\\.\\pipe\\")
-                .Select(p => p.Split("\\").Last())
-            );
-        }
-
         internal static CancellationToken CancelAfter(int timeoutMs)
         {
             var token = new CancellationTokenSource();
@@ -130,15 +125,16 @@ namespace nadena.dev.ndmf.platform.resonite
                 }
             }
 
-            var activePipes = ActivePipes();
-            if (activePipes.Contains(DevPipeName))
+            var activePipes = _pipePathManager.ActivePipes();
+            var devPipeName = _pipePathManager.DevPipePath();
+            if (activePipes.Contains(devPipeName))
             {
                 _isDebugBackend = true;
-                return _client = OpenChannel(DevPipeName);
+                return _client = OpenChannel(devPipeName);
             }
 
             _isDebugBackend = false;
-            var pipeName = ProdPipePrefix + Process.GetCurrentProcess().Id;
+            var pipeName = _pipePathManager.GetPipePath();
 
             // if there is already a server running, try to shut it down (since we've lost the process handle)
             if (activePipes.Contains(pipeName))
@@ -163,8 +159,8 @@ namespace nadena.dev.ndmf.platform.resonite
                 await Task.Delay(250); // give it some time to exit
             }
 
-            var cwd = Path.GetFullPath("Packages/nadena.dev.modular-avatar.resonite/ResoPuppet~");
-            var exe = Path.Combine(cwd, "Launcher.exe");
+            var cwd = Path.GetFullPath(RESOPUPPET_DIR);
+            var exe = Path.Combine(cwd, "Launcher" + _executableBinaryExtension);
 
             if (!File.Exists(exe))
             {
@@ -202,6 +198,10 @@ namespace nadena.dev.ndmf.platform.resonite
             _lastProcess.Exited += (sender, e) =>
             {
                 Console.WriteLine("Resonite Launcher exited");
+
+                // ResonitePuppeteer から NamedPipeServer.Dispose を呼ぶ良い手段がなかったので仕方がなくこっちで強制的に削除します by Reina_Sakiria
+                _pipePathManager.ForceRemovePipe(pipeName);
+
                 _client = null;
             };
 
@@ -250,11 +250,11 @@ namespace nadena.dev.ndmf.platform.resonite
     {
         private readonly Task<ResoPuppeteer.ResoPuppeteerClient> _clientTask;
         private bool _isDisposed = false;
-        
+
         public ClientHandle(Task<ResoPuppeteer.ResoPuppeteerClient> client)
         {
             _clientTask = client;
-            
+
             var currentContext = SynchronizationContext.Current;
             SynchronizationContext.SetSynchronizationContext(null);
             Task.Run(async () =>
@@ -267,7 +267,7 @@ namespace nadena.dev.ndmf.platform.resonite
             });
             SynchronizationContext.SetSynchronizationContext(currentContext);
         }
-        
+
         public Task<ResoPuppeteer.ResoPuppeteerClient> GetClient()
         {
             return _clientTask;
@@ -277,5 +277,52 @@ namespace nadena.dev.ndmf.platform.resonite
         {
             _isDisposed = true;
         }
+    }
+
+
+    internal abstract class PipeManager
+    {
+        private const string DevPipeName = "MA_RESO_PUPPETEER_DEV";
+        private const string ProdPipePrefix = "ModularAvatarResonite_PuppetPipe_";
+
+        internal abstract HashSet<string> ActivePipes();
+        internal abstract void ForceRemovePipe(string pipePath);
+        internal virtual string DevPipePath() => DevPipeName;
+        internal virtual string GetPipePath() => ProdPipePrefix + Process.GetCurrentProcess().Id;
+    }
+    internal class WindowsPipeManager : PipeManager
+    {
+        private const string PipeRoot = "\\\\.\\pipe\\";
+        internal override HashSet<string> ActivePipes()
+        {
+            return new HashSet<string>(System.IO.Directory.GetFiles(PipeRoot)
+                .Select(p => p.Split("\\").Last())
+            );
+        }
+
+        internal override void ForceRemovePipe(string pipePath)
+        {
+            // Windows ではこれをする必要はない可能性はかなり高いですが念の為 by Reina_Sakiria
+            var pipeFullPath = Path.Combine(PipeRoot, pipePath);
+            try { if (File.Exists(pipeFullPath)) { File.Delete(pipeFullPath); } }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+    }
+    internal class LinuxPipeManager : PipeManager
+    {
+        private const string PipeFolder = ".ResonitePuppetPipe";
+        internal override HashSet<string> ActivePipes()
+        {
+            if (Directory.Exists(PipeFolder) is false) Directory.CreateDirectory(PipeFolder);
+            return Directory.GetFiles(PipeFolder).Select(Path.GetFullPath).ToHashSet();
+        }
+
+        internal override void ForceRemovePipe(string pipePath)
+        {
+            try { if (File.Exists(pipePath)) { File.Delete(pipePath); } }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+        internal override string DevPipePath() { return Path.GetFullPath(Path.Combine(PipeFolder, base.DevPipePath())); }
+        internal override string GetPipePath() { return Path.GetFullPath(Path.Combine(PipeFolder, base.GetPipePath())); }
     }
 }
