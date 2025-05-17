@@ -108,10 +108,11 @@ jobs:
           Write-Error "Resonite source files were copied into the output artifact"
           exit 1
         }
-        
-    - name: Copy into final package location
-      run: .\DevTools~\SyncToUnity.ps1
       
+    - name: Copy Unity library artifacts
+      run: |
+        Copy-Item -Path "Resonite~/ResoniteHook/ResoPuppetSchema/bin/*" -Destination "./Managed" -Recurse -Force
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
