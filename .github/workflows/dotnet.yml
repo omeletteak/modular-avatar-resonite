@@ -88,7 +88,8 @@ jobs:
           "System.*",
           "Microsoft.*",
           "mscorlib.dll",
-          "netstandard.dll"
+          "netstandard.dll",
+          "WindowsBase.dll"
         )
         Get-ChildItem -Path "${{ env.RESONITE_ASSEMBLY_PATH }}" | ForEach-Object {
           $fileName = $_.Name
