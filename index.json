@@ -1,0 +1,23 @@
+{
+  "name": "omeletteak's VPM Repository",
+  "author": "omeletteak",
+  "url": "https://omeletteak.github.io/modular-avatar-resonite/index.json",
+  "packages": {
+    "nadena.dev.modular-avatar.resonite": {
+      "versions": {
+        "0.0.41-batch-build.1": {
+          "name": "nadena.dev.modular-avatar.resonite",
+          "displayName": "Modular Avatar - Resonite support",
+          "version": "0.0.41-batch-build.1",
+          "unity": "2022.3",
+          "license": "MIT",
+          "vpmDependencies": {
+            "nadena.dev.ndmf": ">=1.8.0-beta.4 <2.0.0-a",
+            "nadena.dev.modular-avatar": ">=1.13.0-beta.0 <2.0.0-a"
+          },
+          "url": "https://github.com/omeletteak/modular-avatar-resonite.git#feature/batch-build"
+        }
+      }
+    }
+  }
+}
