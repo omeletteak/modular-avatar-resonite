@@ -15,7 +15,7 @@
             "nadena.dev.ndmf": ">=1.8.0-beta.4 <2.0.0-a",
             "nadena.dev.modular-avatar": ">=1.13.0-beta.0 <2.0.0-a"
           },
-          "url": "https://github.com/omeletteak/modular-avatar-resonite.git#feature/batch-build"
+          "url": "https://github.com/omeletteak/modular-avatar-resonite/archive/feature/batch-build.zip"
         }
       }
     }
