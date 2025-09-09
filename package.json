@@ -1,7 +1,7 @@
 {
-  "name": "nadena.dev.modular-avatar.resonite",
-  "displayName": "Modular Avatar - Resonite support",
-  "version": "0.0.40",
+  "name": "omelette_ak.nadena.dev.modular-avatar.resonite",
+  "displayName": "Modular Avatar - Resonite support (omelette_ak fork)",
+  "version": "0.0.1",
   "unity": "2022.3",
   "description": "",
   "dependencies": {},

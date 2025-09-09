@@ -30,7 +30,7 @@ namespace nadena.dev.ndmf.platform.resonite
         private static bool _isDebugBackend;
 
         private static CancellationTokenSource _logStreamCancellationToken = new();
-        internal const string RESOPUPPET_DIR = "Packages/nadena.dev.modular-avatar.resonite/ResoPuppet~";
+        internal const string RESOPUPPET_DIR = "Packages/omelette_ak.nadena.dev.modular-avatar.resonite/ResoPuppet~";
 
         private static ResoPuppeteer.ResoPuppeteerClient OpenChannel(string pipeName)
         {

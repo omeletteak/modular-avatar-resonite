@@ -7,7 +7,7 @@ namespace nadena.dev.ndmf.platform.resonite
 {
     internal class ResoniteBuildUI : BuildUIElement
     {
-        const string ResourcesRoot = "Packages/nadena.dev.modular-avatar.resonite/Editor/UI/Resources/"; 
+        const string ResourcesRoot = "Packages/omelette_ak.nadena.dev.modular-avatar.resonite/Editor/UI/Resources/"; 
         private UnityEngine.GameObject _avatarRoot;
         private Button _buildButton, _copyPathButton, _saveAsButton;
 
