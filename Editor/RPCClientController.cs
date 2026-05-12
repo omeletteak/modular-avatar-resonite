@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+using Grpc.Core;
 using GrpcDotNetNamedPipes;
 using JetBrains.Annotations;
 using nadena.dev.ndmf.proto.rpc;
@@ -83,6 +84,8 @@ namespace nadena.dev.ndmf.platform.resonite
                         break;
                 }
             }
+            
+            Debug.Log("[MA-Resonite] Log stream disconnected");
         } 
 
         public static ClientHandle ClientHandle()
@@ -94,7 +97,7 @@ namespace nadena.dev.ndmf.platform.resonite
 
         public static Task<ResoPuppeteer.ResoPuppeteerClient> GetClient()
         {
-            if (_clientTask != null && !_clientTask.IsCompleted)
+            if (_clientTask != null && !_clientTask.IsCompletedSuccessfully)
             {
                 return _clientTask;
             }
@@ -161,61 +164,69 @@ namespace nadena.dev.ndmf.platform.resonite
 
             var cwd = Path.GetFullPath(RESOPUPPET_DIR);
             var exe = Path.Combine(cwd, "Launcher" + _executableBinaryExtension);
-
-            if (!File.Exists(exe))
-            {
-                throw new FileNotFoundException("Resonite Launcher not found", exe);
-            }
-
+            
             var libraryPath = Path.Combine(Directory.GetParent(Application.dataPath)!.FullName, "Library");
             var tempDir = Path.Combine(libraryPath, "ResonitePuppet");
             Directory.CreateDirectory(tempDir);
 
-            var logPath = Path.Combine(tempDir, "puppeteer.log.txt");
-
-            var args = new string[]
-            {
-                "--pipe-name", pipeName,
-                "--temp-directory", tempDir,
-                "--auto-shutdown-timeout", "30",
-                "--log-path", "\"" + logPath + "\""
-            };
-
             var startInfo = new ProcessStartInfo
             {
                 FileName = exe,
-                Arguments = string.Join(" ", args),
+                ArgumentList = {
+                    "--pipe-name", pipeName,
+                    "--temp-directory", tempDir,
+                    "--auto-shutdown-timeout", "30"
+                },
                 WorkingDirectory = cwd,
                 UseShellExecute = false,
                 CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
             };
 
-            _lastProcess = new Process
+            var myProcess = _lastProcess = new Process
             {
                 StartInfo = startInfo,
                 EnableRaisingEvents = true
             };
-            _lastProcess.Exited += (sender, e) =>
+            
+            TaskCompletionSource<object?> ProcessExit = new TaskCompletionSource<object?>();
+            myProcess.OutputDataReceived += (_, e) =>
             {
-                Console.WriteLine("Resonite Launcher exited");
+                if (!string.IsNullOrWhiteSpace(e.Data)) Debug.Log("[MA-Resonite] " + e.Data);
+            };
+            myProcess.ErrorDataReceived += (_, e) =>
+            {
+                if (!string.IsNullOrWhiteSpace(e.Data)) Debug.LogError("[MA-Resonite] " + e.Data);
+            };
+            myProcess.Exited += (sender, e) =>
+            {
+                Debug.Log("[RPCClientController] Resonite Launcher exited");
 
                 // ResonitePuppeteer から NamedPipeServer.Dispose を呼ぶ良い手段がなかったので仕方がなくこっちで強制的に削除します by Reina_Sakiria
                 _pipePathManager.ForceRemovePipe(pipeName);
+                
+                ProcessExit.TrySetResult(null);
 
                 _client = null;
             };
 
-            if (!_lastProcess.Start())
+            if (!myProcess.Start())
             {
                 throw new Exception("Failed to start Resonite Launcher");
             }
+            
+            myProcess.BeginErrorReadLine();
+            myProcess.BeginOutputReadLine();
+
+            Debug.Log("[RPCClientController] Process started");
 
             // Register domain reload hook to shut down the server
             AppDomain.CurrentDomain.DomainUnload += (sender, e) =>
             {
                 try
                 {
-                    _lastProcess.Kill();
+                    myProcess.Kill();
                 }
                 catch (Exception ex)
                 {
@@ -228,7 +239,7 @@ namespace nadena.dev.ndmf.platform.resonite
             {
                 try
                 {
-                    _lastProcess.Kill();
+                    myProcess.Kill();
                 }
                 catch (Exception ex)
                 {
@@ -239,7 +250,30 @@ namespace nadena.dev.ndmf.platform.resonite
             var tmpClient = OpenChannel(pipeName);
 
             // Wait for the server to start
-            await tmpClient.PingAsync(new(), cancellationToken: CancelAfter(60_000));
+            var cancellationToken = CancelAfter(10_000);
+            var ping = tmpClient.PingAsync(new(), cancellationToken: cancellationToken);
+            await Task.WhenAny(ping.ResponseAsync, ProcessExit.Task);
+            if (ProcessExit.Task.IsCompleted)
+            {
+                throw new Exception("Resonite Launcher failed to start");
+            }
+
+            try
+            {
+                await ping.ResponseAsync;
+            }
+            catch (RpcException ex)
+            {
+                if (ex.StatusCode == StatusCode.Cancelled)
+                {
+                    throw new Exception("Resonite Launcher failed to start (timeout)");
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
             _client = tmpClient;
 
             return _client;
@@ -310,7 +344,7 @@ namespace nadena.dev.ndmf.platform.resonite
     }
     internal class LinuxPipeManager : PipeManager
     {
-        private const string PipeFolder = ".ResonitePuppetPipe";
+        private const string PipeFolder = "/tmp/ResonitePuppetPipe";
         internal override HashSet<string> ActivePipes()
         {
             if (Directory.Exists(PipeFolder) is false) Directory.CreateDirectory(PipeFolder);
@@ -322,7 +356,7 @@ namespace nadena.dev.ndmf.platform.resonite
             try { if (File.Exists(pipePath)) { File.Delete(pipePath); } }
             catch (Exception e) { Debug.LogException(e); }
         }
-        internal override string DevPipePath() { return Path.GetFullPath(Path.Combine(PipeFolder, base.DevPipePath())); }
-        internal override string GetPipePath() { return Path.GetFullPath(Path.Combine(PipeFolder, base.GetPipePath())); }
+        internal override string DevPipePath() { return Path.Combine(PipeFolder, base.DevPipePath()); }
+        internal override string GetPipePath() { return Path.Combine(PipeFolder, base.GetPipePath()); }
     }
 }
